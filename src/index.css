@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;750&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Force body and html to be extremely rich pure black */
+html, body, #root {
+  background-color: #000000 !important;
+  color: #f8fafc;
+}
+
+/* Sophisticated glassy fonts with crystal-reflection, light refraction and ambient glows */
+.font-glass-title {
+  font-family: "Space Grotesk", sans-serif;
+  color: #ffffff;
+  letter-spacing: -0.035em;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.88) 50%, rgba(255, 255, 255, 0.4) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(255, 255, 255, 0.12));
+}
+
+.font-glass-highlight-amber {
+  font-family: "Space Grotesk", sans-serif;
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 60%, rgba(245, 158, 11, 0.4) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.4));
+}
+
+.font-glass-highlight-emerald {
+  font-family: "Space Grotesk", sans-serif;
+  background: linear-gradient(135deg, #a7f3d0 0%, #10b981 60%, rgba(16, 185, 129, 0.4) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4));
+}
+
+.font-glass-body {
+  color: rgba(241, 245, 249, 0.85) !important;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
+}
+
+.font-glass-body-muted {
+  color: rgba(148, 163, 184, 0.72) !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.03);
+}
+
+.font-glass-mono {
+  font-family: "JetBrains Mono", monospace;
+  color: rgba(241, 245, 249, 0.9);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.12);
+}
+
+.font-glass-mono-amber {
+  font-family: "JetBrains Mono", monospace;
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+}
+
+/* Glass panel structure with satin smooth refraction and clear outline borders */
+.glass-panel {
+  background: rgba(10, 10, 10, 0.5) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Custom styles for range slider to match high-fidelity theme */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 3px solid #000000;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #34d399;
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.8);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 3px solid #0f172a;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  background: #34d399;
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.8);
+}
+

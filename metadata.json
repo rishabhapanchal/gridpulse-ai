@@ -1,0 +1,6 @@
+{
+  "name": "Grid Pulse AI",
+  "description": "Calculates estimated solar savings, payback period, and environmental impact metrics interactively with a gorgeous dark glassmorphic UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
