@@ -180,7 +180,7 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Handle Frontend serving safely across deployment systems
+// Only handle the Vite asset pipeline locally during development
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   const { createServer } = await import('vite');
   const vite = await createServer({
@@ -188,20 +188,12 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     appType: 'spa',
   });
   app.use(vite.middlewares);
-} else {
-  const distPath = path.join(process.cwd(), 'dist');
-  app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
-
-// Only listen locally, Vercel will handle listening natively via handles
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  
   const PORT = 3000;
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running locally on port ${PORT}`);
   });
 }
 
+// Export the Express instance for Vercel's serverless handler
 export default app;
