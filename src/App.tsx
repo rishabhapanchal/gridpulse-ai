@@ -443,7 +443,7 @@ export function App() {
                         <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
                           {formatCurrency(state.monthlyBill)}
                         </span>
-                        <span className="text-xs font-mono text-slate-400">/mo</span>
+                        <span className="text-xs font-mono text-slate-450">/mo</span>
                       </div>
                     </div>
 
@@ -470,7 +470,7 @@ export function App() {
                     </div>
 
                     <div className="pt-1.5">
-                      <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">Quick Grid Presets</div>
+                      <div className="text-[11px] font-mono text-slate-450 uppercase tracking-wider mb-2">Quick Grid Presets</div>
                       <div className="grid grid-cols-5 gap-2">
                         {billPresets.map((val) => {
                           const isSelected = state.monthlyBill === val;
@@ -720,9 +720,19 @@ export function App() {
           </motion.main>
         )}
 
+        {/* RECOGNIZED CALL BACK BINDINGS COMPILING SMOOTH NAVIGATION HOOKS */}
         {currentView === 'blog' && (
-          <motion.div key="blog-hub-view" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}>
-            <BlogHub onSelectArticle={handleNavigateToArticle} />
+          <motion.div 
+            key="blog-hub-view" 
+            initial={{ opacity: 0, y: 15 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -15 }} 
+            transition={{ duration: 0.3 }}
+          >
+            <BlogHub 
+              onSelectArticle={handleNavigateToArticle} 
+              onBack={handleNavigateToHome} 
+            />
           </motion.div>
         )}
 
