@@ -1,23 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="monetag" content="2643bb351785af5e1237a9335c8db48e" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9Z9P3VVKXR"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-9Z9P3VVKXR');
-    </script>
+    <title>Grid Pulse</title>
 
-    <title>Grid Pulse AI - Solar & Energy Savings Analyzer</title>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+
+    <link rel="modulepreload" href="/src/main.tsx" as="script" crossorigin="anonymous">
+
+    <script>
+      window.addEventListener('load', function() {
+        // Wait 1.5 seconds after page load before spinning up heavy tracking containers
+        setTimeout(function() {
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-9ZP3VVKXR'); // Applied your GTM ID from report
+        }, 1500);
+      });
+    </script>
   </head>
   <body>
+    <noscript>
+      <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-9ZP3VVKXR"
+      height="0" width="0" style="display:none;visibility:hidden;"></iframe>
+    </noscript>
+
     <div id="root"></div>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
