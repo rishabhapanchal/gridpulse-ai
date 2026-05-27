@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Link your live sitemap coordinates directly
+Sitemap: https://gridpulse.co.in/sitemap.xml
