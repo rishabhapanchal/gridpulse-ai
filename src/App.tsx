@@ -38,6 +38,9 @@ import SolarHardwareStore from './components/SolarHardwareStore';
 import BlogHub from './components/BlogHub';
 import ArticleViewer from './components/ArticleViewer';
 
+// COMPLIANCE AND PROTECTION INTERFACE LAYER MODALS
+import LegalModal from './components/LegalModal';
+
 export function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -45,6 +48,10 @@ export function App() {
   // USER INTERFACE ROUTING VIEW STATE CONTROLLER
   const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
   const [selectedArticleId, setSelectedArticleId] = useState<string>('');
+
+  // LEGAL OVERLAY GATEWAY STATE MACHINE
+  const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms'>('privacy');
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState<boolean>(false);
 
   const [apiStatus, setApiStatus] = useState<{
     status: 'checking' | 'active' | 'missing_key' | 'fallback_mode';
@@ -118,6 +125,11 @@ export function App() {
   const handleNavigateToHome = () => {
     setCurrentView('landing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenLegal = (type: 'privacy' | 'terms') => {
+    setLegalModalType(type);
+    setIsLegalModalOpen(true);
   };
 
   const handleBillExtracted = (data: ExtractedBillData) => {
@@ -202,31 +214,6 @@ export function App() {
       });
     }
   };
-
-  // Format currency numbers cleanly
-  const formatCurrency = (val: number) => {
-    try {
-      return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
-        style: 'currency',
-        currency: country.currency,
-        maximumFractionDigits: 0,
-      }).format(val);
-    } catch (e) {
-      return `${country.symbol}${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-    }
-  };
-
-  const formatRate = (val: number) => {
-    return `${country.symbol}${val.toFixed(2)}`;
-  };
-
-  const minBill = country.minBill;
-  const maxBill = country.maxBill;
-  const stepBill = country.stepBill;
-
-  const minRate = country.minRate;
-  const maxRate = country.maxRate;
-  const stepRate = country.stepRate;
 
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
@@ -443,7 +430,7 @@ export function App() {
                         <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
                           {formatCurrency(state.monthlyBill)}
                         </span>
-                        <span className="text-xs font-mono text-slate-450">/mo</span>
+                        <span className="text-xs font-mono text-slate-400">/mo</span>
                       </div>
                     </div>
 
@@ -749,8 +736,8 @@ export function App() {
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-mono font-semibold tracking-wider text-slate-400">
             <button onClick={handleNavigateToHome} className="hover:text-amber-400 transition-colors cursor-pointer">HOME FORECASTER</button>
             <button onClick={handleNavigateToBlog} className="hover:text-amber-400 transition-colors cursor-pointer">INSIGHTS & ARTICLES</button>
-            <a href="#privacy" className="hover:text-amber-400 transition-colors">PRIVACY COMPLIANCE</a>
-            <a href="#terms" className="hover:text-amber-400 transition-colors">TERMS OF USE</a>
+            <button onClick={() => handleOpenLegal('privacy')} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-mono font-semibold text-[11px] tracking-wider">PRIVACY COMPLIANCE</button>
+            <button onClick={() => handleOpenLegal('terms')} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-mono font-semibold text-[11px] tracking-wider">TERMS OF USE</button>
           </div>
 
           <div className="max-w-2xl text-center space-y-2 mt-2">
@@ -764,6 +751,13 @@ export function App() {
       </footer>
 
       <AIEnergyAdvisor monthlyBill={state.monthlyBill} sunHours={state.sunHours} results={results} roofOrientation={state.roofOrientation} billExtractedData={billData} currency={currency} currencySymbol={currencySymbol} />
+      
+      {/* LEGAL LAYER COMPLIANCE POPUP DRAWER MODALS */}
+      <LegalModal 
+        isOpen={isLegalModalOpen} 
+        type={legalModalType} 
+        onClose={() => setIsLegalModalOpen(false)} 
+      />
     </div>
   );
 }
