@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Orbitron", sans-serif;
+  --font-glass-title: "Space Grotesk", sans-serif;
+  --font-glass-body: "Inter", sans-serif;
+}
+
+/* Premium Glassmorphism Utility Layers */
+.glass-panel {
+  background: rgba(8, 11, 20, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.font-glass-mono-amber {
+  font-family: monospace;
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+}
+
+.font-glass-highlight-amber {
+  font-family: "Space Grotesk", sans-serif;
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
