@@ -20,7 +20,8 @@ import {
   Award,
   ArrowUpRight,
   Globe,
-  ChevronDown
+  ChevronDown,
+  BookOpen // Imported for our new Resources UI elements
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalculatorState, RoofOrientation } from './types';
@@ -33,9 +34,17 @@ import BillAnalyzer, { ExtractedBillData } from './components/BillAnalyzer';
 import { COUNTRIES, CountryConfig } from './utils/countryConfig';
 import SolarHardwareStore from './components/SolarHardwareStore';
 
+// IMPORTING OUR BRAND NEW CONTENT HUD ARCHITECTURE COMPONENTS
+import BlogHub from './components/BlogHub';
+import ArticleViewer from './components/ArticleViewer';
+
 export default function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+
+  // VIEW NAVIGATION LAYER CONTROLLER
+  const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
+  const [selectedArticleId, setSelectedArticleId] = useState<string>('');
 
   const [apiStatus, setApiStatus] = useState<{
     status: 'checking' | 'active' | 'missing_key' | 'fallback_mode';
@@ -93,6 +102,23 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'financial' | 'environmental'>('financial');
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [billData, setBillData] = useState<ExtractedBillData | null>(null);
+
+  // INTERACTION VIEW ROUTER HANDLERS
+  const handleNavigateToBlog = () => {
+    setCurrentView('blog');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToArticle = (id: string) => {
+    setSelectedArticleId(id);
+    setCurrentView('article');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToHome = () => {
+    setCurrentView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleBillExtracted = (data: ExtractedBillData) => {
     setBillData(data);
@@ -221,7 +247,7 @@ export default function App() {
       <header className="relative z-40 border-b border-white/5 bg-black/60 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <button 
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={handleNavigateToHome}
             className="flex items-center space-x-3 focus:outline-none cursor-pointer group/logo active:scale-[0.98] transition-transform duration-200 text-left"
             aria-label="Home"
           >
@@ -239,6 +265,20 @@ export default function App() {
           </button>
 
           <div className="flex items-center space-x-3 text-xs">
+            {/* NEW: Clean, High-End Knowledge Base Navigation Trigger */}
+            <button
+              type="button"
+              onClick={handleNavigateToBlog}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold tracking-wider transition-all duration-200 cursor-pointer border ${
+                currentView === 'blog' || currentView === 'article'
+                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                  : 'bg-transparent text-slate-400 border-transparent hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>RESOURCES</span>
+            </button>
+
             {/* Elegant glassmorphic Currency & Country Dropdown */}
             <div className="relative pr-1">
               <button
@@ -339,470 +379,480 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-8">
-
-        {/* TOP INTRO BANNER HERO COMPONENT */}
-        <div className="relative glass-panel p-6 sm:p-8 rounded-[28px] overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-          {/* Subtle line glow at top */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
-          
-          <div className="max-w-2xl">
-            <h1 className="text-xl sm:text-2xl font-glass-title font-bold tracking-tight text-slate-100 flex items-center gap-2">
-              Grid Pulse AI
-            </h1>
-            <p className="text-xs sm:text-sm font-glass-body mt-2 leading-relaxed">
-              Analyze your photovoltaic generating potential, estimated hardware dimensions, payback cycles, and carbon savings in real-time. Use the slider below to adjust your grid electrical expenses.
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center">
-            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl px-4.5 py-3 flex items-center space-x-3.5 shadow-inner">
-              <div className="text-amber-400 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <Award className="w-5 h-5 animate-pulse" />
+      {/* RENDER CONTENT BLOCKS CONDITIONALLY ACCORDING TO ROUTING PARAMETERS */}
+      <AnimatePresence mode="wait">
+        {currentView === 'landing' && (
+          <motion.main 
+            key="landing-view"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3 }}
+            className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-8"
+          >
+            {/* TOP INTRO BANNER HERO COMPONENT */}
+            <div className="relative glass-panel p-6 sm:p-8 rounded-[28px] overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
+              
+              <div className="max-w-2xl">
+                <h1 className="text-xl sm:text-2xl font-glass-title font-bold tracking-tight text-slate-100 flex items-center gap-2">
+                  Grid Pulse AI
+                </h1>
+                <p className="text-xs sm:text-sm font-glass-body mt-2 leading-relaxed">
+                  Analyze your photovoltaic generating potential, estimated hardware dimensions, payback cycles, and carbon savings in real-time. Use the slider below to adjust your grid electrical expenses.
+                </p>
               </div>
-              <div>
-                <div className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">Federal Incentive</div>
-                <div className="text-xs font-bold text-slate-200 mt-0.5">30% Investment Tax ITC</div>
+
+              <div className="flex shrink-0 items-center">
+                <div className="bg-slate-950/80 border border-slate-800 rounded-2xl px-4.5 py-3 flex items-center space-x-3.5 shadow-inner">
+                  <div className="text-amber-400 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                    <Award className="w-5 h-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">Federal Incentive</div>
+                    <div className="text-xs font-bold text-slate-200 mt-0.5">30% Investment Tax ITC</div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* PRIMARY BENTO GRID INTERACTIVE CORE LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* LEFT COMMAND PANEL: USER CONTROLS (12 cols on mobile, 5 cols on lg) */}
-          <section id="savings-calibration" className="lg:col-span-5 flex flex-col gap-6 w-full">
-            <div className="relative glass-panel rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            {/* PRIMARY BENTO GRID INTERACTIVE CORE LAYOUT */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* Subtle top glare line */}
-              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/40 to-transparent"></div>
+              {/* LEFT COMMAND PANEL: USER CONTROLS */}
+              <section id="savings-calibration" className="lg:col-span-5 flex flex-col gap-6 w-full">
+                <div className="relative glass-panel rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+                  <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/40 to-transparent"></div>
 
-              {/* Title Section inside settings block */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
-                <div className="flex items-center space-x-2.5">
-                  <div className="p-2 bg-black border border-white/10 text-amber-400 rounded-xl">
-                    <Settings className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-sm font-glass-title font-bold tracking-tight pb-0.5">
-                    Savings Calibration
-                  </h2>
-                </div>
-                <span className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">
-                  System Inputs
-                </span>
-              </div>
-
-              {/* CONTROL 1: MONTHLY ELECTRICITY BILL RANGE SLIDER */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-end">
-                  <label htmlFor="utility-bill-slider" className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
-                    Monthly Electricity Bill
-                    <span className="text-slate-500 hover:text-slate-400 cursor-pointer">
-                      <HelpCircle className="w-3.5 h-3.5" title="Your monthly grid power costs." />
-                    </span>
-                  </label>
-                  
-                  {/* Glowing Slider Indicator bubble */}
-                  <div className="flex items-baseline space-x-1">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
-                      {formatCurrency(state.monthlyBill)}
-                    </span>
-                    <span className="text-xs font-mono text-slate-400">/mo</span>
-                  </div>
-                </div>
-
-                {/* Range Slider Track */}
-                <div className="relative pt-1">
-                  <input
-                    id="utility-bill-slider"
-                    type="range"
-                    min={minBill}
-                    max={maxBill}
-                    step={stepBill}
-                    value={state.monthlyBill}
-                    onChange={(e) => handleBillChange(parseInt(e.target.value))}
-                    className="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer border border-slate-850 accent-amber-500 focus:outline-none"
-                    style={{
-                      background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${((state.monthlyBill - minBill) / (maxBill - minBill)) * 100}%, #020617 ${((state.monthlyBill - minBill) / (maxBill - minBill)) * 100}%, #020617 100%)`
-                    }}
-                  />
-                  {/* Low / High helper boundaries block */}
-                  <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
-                    <span>{formatCurrency(minBill)} Min</span>
-                    <span>{formatCurrency(currency === 'INR' ? 12000 : 150)} Avg</span>
-                    <span>{formatCurrency(currency === 'INR' ? 32000 : 400)} High</span>
-                    <span>{formatCurrency(maxBill)} Max</span>
-                  </div>
-                </div>
-
-                {/* Bill Cost Preset Fast Buttons */}
-                <div className="pt-1.5">
-                  <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">
-                    Quick Grid Presets
-                  </div>
-                  <div className="grid grid-cols-5 gap-2">
-                    {billPresets.map((val) => {
-                      const isSelected = state.monthlyBill === val;
-                      return (
-                        <motion.button
-                          key={val}
-                          type="button"
-                          onClick={() => handleBillChange(val)}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`py-2 text-xs font-mono font-bold rounded-xl transition-all duration-300 border cursor-pointer ${
-                            isSelected
-                              ? 'bg-amber-500/10 text-amber-300 border-amber-500/40 shadow-inner'
-                              : 'bg-slate-950/85 text-slate-400 border-slate-800/80 hover:border-slate-700/60 hover:text-slate-100'
-                          }`}
-                        >
-                          {formatCurrency(val)}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* CONTROL 2: ROOF ORIENTATION TABS SELECTOR */}
-              <div className="space-y-3 mt-6 pt-5 border-t border-slate-850/60">
-                <label className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
-                  Roof Orientation Multiplier
-                  <span className="text-slate-500 hover:text-slate-400 cursor-pointer">
-                    <HelpCircle className="w-3.5 h-3.5" title="South orientation absorbs maximum photon counts." />
-                  </span>
-                </label>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  {(['south', 'west', 'east', 'north'] as RoofOrientation[]).map((orientation) => {
-                    const isSelected = state.roofOrientation === orientation;
-                    const orientationFactors = { south: '100%', west: '85%', east: '85%', north: '55%' };
-                    return (
-                      <motion.button
-                        key={orientation}
-                        type="button"
-                        onClick={() => handleOrientationChange(orientation)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`px-4 py-3 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
-                          isSelected
-                            ? 'bg-slate-950/90 border-amber-500/50 shadow-inner'
-                            : 'bg-slate-950/45 border-slate-850 hover:bg-slate-950/80 hover:border-slate-800'
-                        }`}
-                      >
-                        {/* Selector indicator */}
-                        <div className="flex justify-between items-center column">
-                          <span className={`text-xs font-extrabold capitalize ${isSelected ? 'text-amber-400' : 'text-slate-300'}`}>
-                            {orientation}
-                          </span>
-                          <span className={`text-[9px] font-mono ${isSelected ? 'text-amber-400 font-extrabold' : 'text-slate-500'}`}>
-                            {orientationFactors[orientation]}
-                          </span>
-                        </div>
-                        <div className="text-[9px] text-slate-450 mt-1.5 font-sans leading-tight truncate">
-                          {orientation === 'south' && 'Maximum Daily Yield'}
-                          {orientation === 'west' && 'Peak Evening Supply'}
-                          {orientation === 'east' && 'High Morning Yield'}
-                          {orientation === 'north' && 'Standard Ambient Production'}
-                        </div>
-                        
-                        {/* Interactive sliding glow dot */}
-                        {isSelected && (
-                          <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-gradient-to-b from-amber-550 to-yellow-500"></div>
-                        )}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ADVANCED CALIBRATORS DRAWER */}
-              <div className="mt-5 pt-3.5 border-t border-slate-850/60">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 py-1 font-mono transition-colors duration-200"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <ChevronRight className={`w-3.5 h-3.5 text-amber-500 transition-transform duration-300 ${showAdvanced ? 'rotate-90' : ''}`} />
-                    {showAdvanced ? 'Hide Advanced Parameters' : 'Show Advanced Parameters'}
-                  </span>
-                  <span className="text-[10px] text-slate-600 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">
-                    Utility Rate, Panel Wattage
-                  </span>
-                </button>
-
-                <AnimatePresence>
-                  {showAdvanced && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="overflow-hidden mt-3 pt-3.5 border-t border-slate-850/30 space-y-4"
-                    >
-                      {/* Sub-control 1: Utility Rate Per kWh */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between items-center text-xs">
-                          <label htmlFor="utility-rate-input" className="text-slate-400 font-semibold">Grid Electricity Rate</label>
-                          <span className="font-mono text-amber-400 font-bold">{formatRate(state.utilityRate)}/kWh</span>
-                        </div>
-                        <input
-                          id="utility-rate-input"
-                          type="range"
-                          min={minRate}
-                          max={maxRate}
-                          step={stepRate}
-                          value={state.utilityRate}
-                          onChange={handleRateChange}
-                          className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                        />
+                  <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="p-2 bg-black border border-white/10 text-amber-400 rounded-xl">
+                        <Settings className="w-4 h-4" />
                       </div>
+                      <h2 className="text-sm font-glass-title font-bold tracking-tight pb-0.5">
+                        Savings Calibration
+                      </h2>
+                    </div>
+                    <span className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">
+                      System Inputs
+                    </span>
+                  </div>
 
-                      {/* Sub-control 2: Solar Panel Wattage Rating */}
-                      <div className="space-y-1.5 pt-1">
-                        <div className="flex justify-between items-center text-xs">
-                          <label className="text-slate-400 font-semibold font-sans">Photovoltaic Rated Panel Capacity</label>
-                          <span className="font-mono text-amber-400 font-bold">{state.panelCapacity} Watts</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          {[380, 400, 420].map((watt) => (
-                            <button
-                              key={watt}
+                  {/* CONTROL 1: MONTHLY ELECTRICITY BILL RANGE SLIDER */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-end">
+                      <label htmlFor="utility-bill-slider" className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                        Monthly Electricity Bill
+                        <span className="text-slate-500 hover:text-slate-400 cursor-pointer">
+                          <HelpCircle className="w-3.5 h-3.5" title="Your monthly grid power costs." />
+                        </span>
+                      </label>
+                      
+                      <div className="flex items-baseline space-x-1">
+                        <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                          {formatCurrency(state.monthlyBill)}
+                        </span>
+                        <span className="text-xs font-mono text-slate-400">/mo</span>
+                      </div>
+                    </div>
+
+                    <div className="relative pt-1">
+                      <input
+                        id="utility-bill-slider"
+                        type="range"
+                        min={minBill}
+                        max={maxBill}
+                        step={stepBill}
+                        value={state.monthlyBill}
+                        onChange={(e) => handleBillChange(parseInt(e.target.value))}
+                        className="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer border border-slate-850 accent-amber-500 focus:outline-none"
+                        style={{
+                          background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${((state.monthlyBill - minBill) / (maxBill - minBill)) * 100}%, #020617 ${((state.monthlyBill - minBill) / (maxBill - minBill)) * 100}%, #020617 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
+                        <span>{formatCurrency(minBill)} Min</span>
+                        <span>{formatCurrency(currency === 'INR' ? 12000 : 150)} Avg</span>
+                        <span>{formatCurrency(currency === 'INR' ? 32000 : 400)} High</span>
+                        <span>{formatCurrency(maxBill)} Max</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-1.5">
+                      <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">
+                        Quick Grid Presets
+                      </div>
+                      <div className="grid grid-cols-5 gap-2">
+                        {billPresets.map((val) => {
+                          const isSelected = state.monthlyBill === val;
+                          return (
+                            <motion.button
+                              key={val}
                               type="button"
-                              onClick={() => setState((prev) => ({ ...prev, panelCapacity: watt }))}
-                              className={`py-1 text-[11px] font-mono rounded border ${
-                                state.panelCapacity === watt
-                                  ? 'bg-amber-400/10 text-amber-300 border-amber-400/40'
-                                  : 'bg-slate-950 text-slate-500 border-slate-850 hover:text-slate-400'
+                              onClick={() => handleBillChange(val)}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className={`py-2 text-xs font-mono font-bold rounded-xl transition-all duration-300 border cursor-pointer ${
+                                isSelected
+                                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/40 shadow-inner'
+                                  : 'bg-slate-950/85 text-slate-400 border-slate-800/80 hover:border-slate-700/60 hover:text-slate-100'
                               }`}
                             >
-                              {watt}W {watt === 400 ? ' (Std)' : ''}
-                            </button>
-                          ))}
-                        </div>
+                              {formatCurrency(val)}
+                            </motion.button>
+                          );
+                        })}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                    </div>
+                  </div>
 
-            </div>
+                  {/* CONTROL 2: ROOF ORIENTATION TABS SELECTOR */}
+                  <div className="space-y-3 mt-6 pt-5 border-t border-slate-850/60">
+                    <label className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                      Roof Orientation Multiplier
+                      <span className="text-slate-500 hover:text-slate-400 cursor-pointer">
+                        <HelpCircle className="w-3.5 h-3.5" title="South orientation absorbs maximum photon counts." />
+                      </span>
+                    </label>
 
-            {/* MULTIMODAL AI BILL ANALYZER */}
-            <BillAnalyzer onDataExtracted={handleBillExtracted} currency={currency} currencySymbol={currencySymbol} />
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {(['south', 'west', 'east', 'north'] as RoofOrientation[]).map((orientation) => {
+                        const isSelected = state.roofOrientation === orientation;
+                        const orientationFactors = { south: '100%', west: '85%', east: '85%', north: '55%' };
+                        return (
+                          <motion.button
+                            key={orientation}
+                            type="button"
+                            onClick={() => handleOrientationChange(orientation)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`px-4 py-3 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+                              isSelected
+                                ? 'bg-slate-950/90 border-amber-500/50 shadow-inner'
+                                : 'bg-slate-950/45 border-slate-850 hover:bg-slate-950/80 hover:border-slate-800'
+                            }`}
+                          >
+                            <div className="flex justify-between items-center column">
+                              <span className={`text-xs font-extrabold capitalize ${isSelected ? 'text-amber-400' : 'text-slate-300'}`}>
+                                {orientation}
+                              </span>
+                              <span className={`text-[9px] font-mono ${isSelected ? 'text-amber-400 font-extrabold' : 'text-slate-500'}`}>
+                                {orientationFactors[orientation]}
+                              </span>
+                            </div>
+                            <div className="text-[9px] text-slate-450 mt-1.5 font-sans leading-tight truncate">
+                              {orientation === 'south' && 'Maximum Daily Yield'}
+                              {orientation === 'west' && 'Peak Evening Supply'}
+                              {orientation === 'east' && 'High Morning Yield'}
+                              {orientation === 'north' && 'Standard Ambient Production'}
+                            </div>
+                            {isSelected && (
+                              <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-gradient-to-b from-amber-550 to-yellow-500"></div>
+                            )}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-            {/* ISOMETRIC 3D HOUSING SCHEMATIC HUD */}
-            <SolarVisualizer
-              panelsNeeded={results.panelsNeeded}
-              systemSizeKw={results.systemSizeKw}
-              sunHours={state.sunHours}
-              onSunHoursChange={handleSunHoursChange}
-              equivalentTrees={results.equivalentTrees}
-              carbonReducedTons={results.carbonReducedTons}
-              roofOrientation={state.roofOrientation}
-            />
-          </section>
+                  {/* ADVANCED CALIBRATORS DRAWER */}
+                  <div className="mt-5 pt-3.5 border-t border-slate-850/60">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                      className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 py-1 font-mono transition-colors duration-200"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <ChevronRight className={`w-3.5 h-3.5 text-amber-500 transition-transform duration-300 ${showAdvanced ? 'rotate-90' : ''}`} />
+                        {showAdvanced ? 'Hide Advanced Parameters' : 'Show Advanced Parameters'}
+                      </span>
+                      <span className="text-[10px] text-slate-600 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">
+                        Utility Rate, Panel Wattage
+                      </span>
+                    </button>
 
-          {/* RIGHT COMMAND PANEL: LIVE DYNAMIC RESULTS CALCULATOR (12 cols on mobile, 7 cols on lg) */}
-          <section className="lg:col-span-7 flex flex-col gap-6 w-full">
-            
-            {/* LARGE LIVE DYNAMIC CALCULATION DISPLAY BOX */}
-            <div className="glass-panel border-amber-500/20 rounded-[28px] p-7 relative overflow-hidden shadow-[0_8px_32px_rgba(245,158,11,0.06)] flex flex-col min-h-[180px] justify-between group">
-              
-              {/* Corner accent glow */}
-              <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/5 rounded-full blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
-              
-              {/* Top highlight bar */}
-              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+                    <AnimatePresence>
+                      {showAdvanced && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="overflow-hidden mt-3 pt-3.5 border-t border-slate-850/30 space-y-4"
+                        >
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs">
+                              <label htmlFor="utility-rate-input" className="text-slate-400 font-semibold">Grid Electricity Rate</label>
+                              <span className="font-mono text-amber-400 font-bold">{formatRate(state.utilityRate)}/kWh</span>
+                            </div>
+                            <input
+                              id="utility-rate-input"
+                              type="range"
+                              min={minRate}
+                              max={maxRate}
+                              step={stepRate}
+                              value={state.utilityRate}
+                              onChange={handleRateChange}
+                              className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            />
+                          </div>
 
-              <div className="z-10 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                <div>
-                  <span className="text-[9px] font-mono text-amber-400 uppercase tracking-[0.12em] font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 w-max">
-                    <CloudLightning className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
-                    Real-time Assessment
-                  </span>
-                  <h2 className="text-lg font-glass-title font-bold tracking-tight mt-3">
-                    Estimated Yearly Savings
-                  </h2>
+                          <div className="space-y-1.5 pt-1">
+                            <div className="flex justify-between items-center text-xs">
+                              <label className="text-slate-400 font-semibold font-sans">Photovoltaic Rated Panel Capacity</label>
+                              <span className="font-mono text-amber-400 font-bold">{state.panelCapacity} Watts</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {[380, 400, 420].map((watt) => (
+                                <button
+                                  key={watt}
+                                  type="button"
+                                  onClick={() => setState((prev) => ({ ...prev, panelCapacity: watt }))}
+                                  className={`py-1 text-[11px] font-mono rounded border ${
+                                    state.panelCapacity === watt
+                                      ? 'bg-amber-400/10 text-amber-300 border-amber-400/40'
+                                      : 'bg-slate-950 text-slate-500 border-slate-850 hover:text-slate-400'
+                                  }`}
+                                >
+                                  {watt}W {watt === 400 ? ' (Std)' : ''}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-                
-                <span className="text-[9px] font-mono text-slate-450 bg-black border border-white/5 px-2.5 py-1 rounded-md">
-                  Formula: Bill * 12 * 95%
-                </span>
-              </div>
 
-              {/* GIANT COUNT SHOWCASE */}
-              <div className="z-10 my-4 flex items-baseline flex-wrap gap-2">
-                <span className="text-5xl sm:text-6xl font-glass-highlight-amber font-bold tracking-tight">
-                  {formatCurrency(results.yearlySavings)}
-                </span>
-                <span className="text-xs font-glass-body tracking-wide uppercase font-semibold">
-                  accumulated annually
-                </span>
-              </div>
+                {/* MULTIMODAL AI BILL ANALYZER */}
+                <BillAnalyzer onDataExtracted={handleBillExtracted} currency={currency} currencySymbol={currencySymbol} />
 
-              {/* Literal and explicit explanation */}
-              <p className="z-10 text-xs sm:text-sm font-glass-body leading-relaxed border-t border-white/5 pt-4 flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 translate-y-1.5 inline-block"></span>
-                <span>
-                  Adjusting your electricity costs offsets energy charges by <strong>95%</strong>. Generating solar power on-site is projected to yield <strong className="font-glass-mono-amber">{formatCurrency(results.yearlySavings / 12)}</strong> monthly net utility credits.
-                </span>
-              </p>
+                {/* ISOMETRIC 3D HOUSING SCHEMATIC HUD */}
+                <SolarVisualizer
+                  panelsNeeded={results.panelsNeeded}
+                  systemSizeKw={results.systemSizeKw}
+                  sunHours={state.sunHours}
+                  onSunHoursChange={handleSunHoursChange}
+                  equivalentTrees={results.equivalentTrees}
+                  carbonReducedTons={results.carbonReducedTons}
+                  roofOrientation={state.roofOrientation}
+                />
+              </section>
+
+              {/* RIGHT COMMAND PANEL: LIVE DYNAMIC RESULTS CALCULATOR */}
+              <section className="lg:col-span-7 flex flex-col gap-6 w-full">
+                <div className="glass-panel border-amber-500/20 rounded-[28px] p-7 relative overflow-hidden shadow-[0_8px_32px_rgba(245,158,11,0.06)] flex flex-col min-h-[180px] justify-between group">
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/5 rounded-full blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
+                  <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                      <span className="text-[9px] font-mono text-amber-400 uppercase tracking-[0.12em] font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 w-max">
+                        <CloudLightning className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+                        Real-time Assessment
+                      </span>
+                      <h2 className="text-lg font-glass-title font-bold tracking-tight mt-3">
+                        Estimated Yearly Savings
+                      </h2>
+                    </div>
+                    <span className="text-[9px] font-mono text-slate-450 bg-black border border-white/5 px-2.5 py-1 rounded-md">
+                      Formula: Bill * 12 * 95%
+                    </span>
+                  </div>
+
+                  <div className="my-4 flex items-baseline flex-wrap gap-2">
+                    <span className="text-5xl sm:text-6xl font-glass-highlight-amber font-bold tracking-tight">
+                      {formatCurrency(results.yearlySavings)}
+                    </span>
+                    <span className="text-xs font-glass-body tracking-wide uppercase font-semibold">
+                      accumulated annually
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm font-glass-body leading-relaxed border-t border-white/5 pt-4 flex items-start gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 translate-y-1.5 inline-block"></span>
+                    <span>
+                      Adjusting your electricity costs offsets energy charges by <strong>95%</strong>. Generating solar power on-site is projected to yield <strong className="font-glass-mono-amber">{formatCurrency(results.yearlySavings / 12)}</strong> monthly net utility credits.
+                    </span>
+                  </p>
+                </div>
+
+                {/* TAB SELECTORS: INVESTMENT METRICS vs ECO IMPACT */}
+                <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2 shadow-inner">
+                  <motion.button
+                    type="button"
+                    onClick={() => setActiveTab('financial')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                      activeTab === 'financial'
+                        ? 'bg-slate-900/80 text-slate-100 border border-slate-805 shadow-md'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <DollarSign className="w-4 h-4 text-amber-400" />
+                    Financial Projections
+                  </motion.button>
+                  
+                  <motion.button
+                    type="button"
+                    onClick={() => setActiveTab('environmental')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                      activeTab === 'environmental'
+                        ? 'bg-slate-900/80 text-slate-100 border border-slate-805 shadow-md'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Trees className="w-4 h-4 text-amber-400" />
+                    Environmental Impact
+                  </motion.button>
+                </div>
+
+                {/* METRIC GRID WRAPPER */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {activeTab === 'financial' ? (
+                    <React.Fragment key="financial-metrics">
+                      <MetricCard
+                        label="Net Hardware Investment"
+                        value={formatCurrency(results.netCost)}
+                        subValue={`Initial gross: ${formatCurrency(results.estimatedCost)}`}
+                        icon={DollarSign}
+                        iconColorClass="text-amber-400"
+                        bgColorClass="bg-amber-500/10"
+                        borderColorClass="border-slate-850"
+                        glowingOrb
+                      />
+                      <MetricCard
+                        label="Payback Break-Even"
+                        value={`${results.paybackPeriodYears} Years`}
+                        subValue={`Break-even year: ${new Date().getFullYear() + Math.ceil(results.paybackPeriodYears)}`}
+                        icon={Scale}
+                        iconColorClass="text-amber-400"
+                        bgColorClass="bg-amber-500/10"
+                        borderColorClass="border-slate-850"
+                      />
+                      <MetricCard
+                        label={country.incentiveName}
+                        value={formatCurrency(results.federalIncentive)}
+                        subValue={country.incentiveDesc}
+                        icon={Award}
+                        iconColorClass="text-yellow-400"
+                        bgColorClass="bg-yellow-500/10"
+                        borderColorClass="border-slate-850"
+                      />
+                      <MetricCard
+                        label="25-Year Cumulative Yield"
+                        value={formatCurrency(results.lifetimeSavings25Years)}
+                        subValue="Assuming standard utility rise grid"
+                        icon={TrendingUp}
+                        iconColorClass="text-amber-500"
+                        bgColorClass="bg-amber-500/10"
+                        borderColorClass="border-slate-850"
+                        glowingOrb
+                      />
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment key="environmental-metrics">
+                      <MetricCard
+                        label="CO2 Offset Yearly"
+                        value={`${results.carbonReducedTons} Metric Tons`}
+                        subValue="Avoided traditional power burning"
+                        icon={Trees}
+                        iconColorClass="text-amber-400"
+                        bgColorClass="bg-amber-500/10"
+                        borderColorClass="border-slate-850"
+                        glowingOrb
+                      />
+                      <MetricCard
+                        label="Equivalent Trees Grown"
+                        value={`${results.equivalentTrees} Trees`}
+                        subValue="Carbon carbonization over 10yr period"
+                        icon={Sun}
+                        iconColorClass="text-amber-400"
+                        bgColorClass="bg-amber-500/10"
+                        borderColorClass="border-slate-850"
+                      />
+                      <MetricCard
+                        label="Standard Generator Capacity"
+                        value={`${results.systemSizeKw.toFixed(1)} kW Peak`}
+                        subValue={`Fitted with ${results.panelsNeeded} solid glass panels`}
+                        icon={CloudLightning}
+                        iconColorClass="text-indigo-400"
+                        bgColorClass="bg-indigo-500/10"
+                        borderColorClass="border-slate-850"
+                      />
+                      <MetricCard
+                        label="Clean Energy Generated"
+                        value={`${makeMetricValueString(results.systemSizeKw, state.sunHours)} kWh/yr`}
+                        subValue="Powers direct home appliance cycle"
+                        icon={ArrowUpRight}
+                        iconColorClass="text-teal-400"
+                        bgColorClass="bg-teal-500/10"
+                        borderColorClass="border-slate-850"
+                      />
+                    </React.Fragment>
+                  )}
+                </div>
+
+                {/* INTEGRATED SAVINGS AND INVESTMENT AREA LINE GRAPH */}
+                <SavingsChart results={results} monthlyBill={state.monthlyBill} currency={currency} currencySymbol={currencySymbol} />
+              </section>
             </div>
 
-             {/* TAB SELECTORS: INVESTMENT METRICS vs ECO IMPACT */}
-             <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2 shadow-inner">
-               <motion.button
-                 type="button"
-                 onClick={() => setActiveTab('financial')}
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.96 }}
-                 className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                   activeTab === 'financial'
-                     ? 'bg-slate-900/80 text-slate-100 border border-slate-805 shadow-md'
-                     : 'text-slate-400 hover:text-slate-200'
-                 }`}
-               >
-                 <DollarSign className="w-4 h-4 text-amber-400" />
-                 Financial Projections
-               </motion.button>
-               
-               <motion.button
-                 type="button"
-                 onClick={() => setActiveTab('environmental')}
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.96 }}
-                 className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                   activeTab === 'environmental'
-                     ? 'bg-slate-900/80 text-slate-100 border border-slate-805 shadow-md'
-                     : 'text-slate-400 hover:text-slate-200'
-                 }`}
-               >
-                 <Trees className="w-4 h-4 text-amber-400" />
-                 Environmental Impact
-               </motion.button>
-             </div>
-
-            {/* METRIC GRID WRAPPER */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <AnimatePresence mode="wait">
-                {activeTab === 'financial' ? (
-                  <React.Fragment>
-                    <MetricCard
-                      label="Net Hardware Investment"
-                      value={formatCurrency(results.netCost)}
-                      subValue={`Initial gross: ${formatCurrency(results.estimatedCost)}`}
-                      icon={DollarSign}
-                      iconColorClass="text-amber-400"
-                      bgColorClass="bg-amber-500/10"
-                      borderColorClass="border-slate-850"
-                      glowingOrb
-                    />
-                    
-                    <MetricCard
-                      label="Payback Break-Even"
-                      value={`${results.paybackPeriodYears} Years`}
-                      subValue={`Break-even year: ${new Date().getFullYear() + Math.ceil(results.paybackPeriodYears)}`}
-                      icon={Scale}
-                      iconColorClass="text-amber-400"
-                      bgColorClass="bg-amber-500/10"
-                      borderColorClass="border-slate-850"
-                    />
-
-                    <MetricCard
-                      label={country.incentiveName}
-                      value={formatCurrency(results.federalIncentive)}
-                      subValue={country.incentiveDesc}
-                      icon={Award}
-                      iconColorClass="text-yellow-400"
-                      bgColorClass="bg-yellow-500/10"
-                      borderColorClass="border-slate-850"
-                    />
-
-                    <MetricCard
-                      label="25-Year Cumulative Yield"
-                      value={formatCurrency(results.lifetimeSavings25Years)}
-                      subValue="Assuming standard utility rise grid"
-                      icon={TrendingUp}
-                      iconColorClass="text-amber-500"
-                      bgColorClass="bg-amber-500/10"
-                      borderColorClass="border-slate-850"
-                      glowingOrb
-                    />
-                  </React.Fragment>
-                ) : (
-                  <React.Fragment>
-                    <MetricCard
-                      label="CO2 Offset Yearly"
-                      value={`${results.carbonReducedTons} Metric Tons`}
-                      subValue="Avoided traditional power burning"
-                      icon={Trees}
-                      iconColorClass="text-amber-400"
-                      bgColorClass="bg-amber-500/10"
-                      borderColorClass="border-slate-850"
-                      glowingOrb
-                    />
-                    
-                    <MetricCard
-                      label="Equivalent Trees Grown"
-                      value={`${results.equivalentTrees} Trees`}
-                      subValue="Carbon carbonization over 10yr period"
-                      icon={Sun}
-                      iconColorClass="text-amber-400"
-                      bgColorClass="bg-amber-500/10"
-                      borderColorClass="border-slate-850"
-                    />
-
-                    <MetricCard
-                      label="Standard Generator Capacity"
-                      value={`${results.systemSizeKw.toFixed(1)} kW Peak`}
-                      subValue={`Fitted with ${results.panelsNeeded} solid glass panels`}
-                      icon={CloudLightning}
-                      iconColorClass="text-indigo-400"
-                      bgColorClass="bg-indigo-500/10"
-                      borderColorClass="border-slate-850"
-                    />
-                    
-                    <MetricCard
-                      label="Clean Energy Generated"
-                      value={`${Math.round(results.systemSizeKw * state.sunHours * 365 * 0.8).toLocaleString()} kWh/yr`}
-                      subValue="Powers direct home appliance cycle"
-                      icon={ArrowUpRight}
-                      iconColorClass="text-teal-400"
-                      bgColorClass="bg-teal-500/10"
-                      borderColorClass="border-slate-850"
-                    />
-                  </React.Fragment>
-                )}
-              </AnimatePresence>
+            {/* ECOSYSTEM HARDWARE MARKETPLACE */}
+            <div className="max-w-7xl mx-auto px-4 pb-8 relative z-20">
+              <SolarHardwareStore
+                country={country}
+                results={results}
+                panelsNeeded={results.panelsNeeded}
+                systemSizeKw={results.systemSizeKw}
+              />
             </div>
+          </motion.main>
+        )}
 
-            {/* INTEGRATED SAVINGS AND INVESTMENT AREA LINE GRAPH */}
-            <SavingsChart results={results} monthlyBill={state.monthlyBill} currency={currency} currencySymbol={currencySymbol} />
+        {/* CONDITIONALLY RENDER THE RESOURCE HUB INDEX GRID */}
+        {currentView === 'blog' && (
+          <motion.div
+            key="blog-hub-view"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BlogHub onSelectArticle={handleNavigateToArticle} />
+          </motion.div>
+        )}
 
-          </section>
-
-        </div>
-
-        {/* ECOSYSTEM HARDWARE MARKETPLACE (AMAZON ASSOCIATES INTEGRATED ADVERTISING FEED) */}
-        <div className="max-w-7xl mx-auto px-4 pb-8 relative z-20">
-          <SolarHardwareStore
-            country={country}
-            results={results}
-            panelsNeeded={results.panelsNeeded}
-            systemSizeKw={results.systemSizeKw}
-          />
-        </div>
-
-      </main>
+        {/* CONDITIONALLY RENDER THE DYNAMIC LONG-FORM ARTICLE VIEWER */}
+        {currentView === 'article' && (
+          <motion.div
+            key="article-viewer-view"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ArticleViewer articleId={selectedArticleId} onBack={handleNavigateToBlog} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* FOOTER & DISCLOSURES COMPONENT */}
       <footer className="border-t border-white/5 bg-black py-10 mt-10 relative z-10 text-slate-500/80 text-xs text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-6">
           
+          {/* NEW: Bottom layout anchor link row for technical compliance and exploration */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-mono font-semibold tracking-wider text-slate-400">
+            <button onClick={handleNavigateToHome} className="hover:text-amber-400 transition-colors cursor-pointer">HOME FORECASTER</button>
+            <button onClick={handleNavigateToBlog} className="hover:text-amber-400 transition-colors cursor-pointer">INSIGHTS & ARTICLES</button>
+            <a href="#privacy" className="hover:text-amber-400 transition-colors">PRIVACY COMPLIANCE</a>
+            <a href="#terms" className="hover:text-amber-400 transition-colors">TERMS OF USE</a>
+          </div>
+
           <div className="max-w-2xl text-center space-y-2 mt-2">
             <p className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
               Technical Calculation Disclosures
@@ -829,4 +879,9 @@ export default function App() {
       />
     </div>
   );
+}
+
+// Quick tiny layout helper function to calculate text generation values cleanly inside JSX
+function makeMetricValueString(sizeKw: number, hours: number): string {
+  return Math.round(sizeKw * hours * 365 * 0.8).toLocaleString();
 }
