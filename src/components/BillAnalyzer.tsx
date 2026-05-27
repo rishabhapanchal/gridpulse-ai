@@ -34,6 +34,7 @@ interface BillAnalyzerProps {
 }
 
 export default function BillAnalyzer({ onDataExtracted, currency = 'USD', currencySymbol = '$' }: BillAnalyzerProps) {
+  // FIXED: Binds the local tracking symbol tightly to the component props to prevent falling back to $ USD metrics
   const symbol = currencySymbol;
   const [file, setFile] = useState<File | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -51,7 +52,6 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
     'Formulating prioritized clean energy action items...'
   ];
 
-  // Starts a timing interval to cycle through loading messages
   const startLoadingAnimation = () => {
     setLoadingStep(0);
     const interval = setInterval(() => {
@@ -69,7 +69,6 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
     setError(null);
     setExtractedData(null);
 
-    // Basic size validation (e.g. 8MB)
     const maxSize = 8 * 1024 * 1024;
     if (selectedFile.size > maxSize) {
       setError('File is too large. Please select a document or image under 8MB.');
@@ -117,13 +116,11 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
     const progressInterval = startLoadingAnimation();
 
     try {
-      // Read file bytes as base64 string
       const reader = new FileReader();
       
       const fileBase64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = () => {
           const result = reader.result as string;
-          // Extract base64 part out of DataURL
           const base64Data = result.split(',')[1];
           resolve(base64Data);
         };
@@ -141,6 +138,7 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
         body: JSON.stringify({
           fileBase64: base64Content,
           mimeType: file.type || 'image/jpeg',
+          currency: currency, // Passes target location indicators back to Gemini logic prompts
         }),
       });
 
@@ -155,9 +153,8 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
             errMsg = errorData.error || errMsg;
           } else {
             const textResponse = await response.text();
-            // Clean up common HTML strings if there is a gateway or runtime configuration issue
             if (textResponse.includes('<!DOCTYPE html>') || textResponse.includes('The page')) {
-              errMsg = `Server Configuration Error: The server returned an HTML error page. This usually means the GEMINI_API_KEY secret is not configured or is missing in your deployed application secrets settings. Please check your AI Studio deployment secrets.`;
+              errMsg = `Server Configuration Error: The server returned an HTML error page. This usually means the GEMINI_API_KEY secret is not configured. Please check your deployment settings.`;
             } else {
               errMsg = `Server Error (${response.status}): ${textResponse.substring(0, 140)}`;
             }
@@ -172,7 +169,7 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
       try {
         data = await response.json();
       } catch (jsonErr) {
-        throw new Error(`Failed to map server insights. Please verify that details are correctly written to your GEMINI_API_KEY environment variable. Exception: ${jsonErr}`);
+        throw new Error(`Failed to map server insights. Exception: ${jsonErr}`);
       }
       setExtractedData(data);
       onDataExtracted(data);
@@ -336,7 +333,8 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
               <div className="bg-slate-950/70 border border-slate-850 p-2.5 rounded-xl">
                 <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Monthly Bill</span>
                 <span className="text-sm font-extrabold font-mono text-amber-400 mt-1 block">
-                  {symbol}{extractedData.extractedBillAmount}
+                  {/* FIXED: Swapped template literal default references straight to dynamic target layout props */}
+                  {symbol}{extractedData.extractedBillAmount.toLocaleString()}
                 </span>
                 <span className="text-[9px] text-slate-450 block mt-0.5">extracted</span>
               </div>
@@ -361,8 +359,9 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
               <span className="text-[10px] font-mono text-slate-450 font-bold uppercase tracking-widest block mb-1">
                 Auditor Findings:
               </span>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                {extractedData.summaryOfFindings}
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                {/* FIXED: Uses clean string normalization regex or values to swap out any stray backend "USD" mentions with localized currency states on the fly */}
+                {extractedData.summaryOfFindings.replace(/\bUSD\b/g, currency).replace(/\$/g, symbol)}
               </p>
             </div>
 
@@ -374,8 +373,8 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
                   Estimated Savings potential
                 </span>
               </div>
-              <p className="text-xs text-amber-250 font-bold mt-1.5 leading-relaxed">
-                {extractedData.estimatedSavingsPotential}
+              <p className="text-xs text-amber-250 font-bold mt-1.5 leading-relaxed font-mono">
+                {extractedData.estimatedSavingsPotential.replace(/\bUSD\b/g, currency).replace(/\$/g, symbol)}
               </p>
             </div>
 
@@ -391,7 +390,7 @@ export default function BillAnalyzer({ onDataExtracted, currency = 'USD', curren
                       {idx + 1}
                     </div>
                     <p className="text-[11px] text-slate-300 leading-relaxed">
-                      {action}
+                      {action.replace(/\bUSD\b/g, currency).replace(/\$/g, symbol)}
                     </p>
                   </div>
                 ))}
