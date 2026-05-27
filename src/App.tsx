@@ -218,7 +218,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
       
-      {/* GLOWING AMBIENT SPACE BACKGROUND EFFECTS */}
+      {/* GLOWING AMBIENT SPACE BACKGROUND EFFECTS (NO LAYOUT SHIFT) */}
       <div className="absolute top-0 left-0 w-full h-[600px] pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[5%] w-[45vw] h-[45vw] bg-amber-500/3 rounded-full blur-[140px]"></div>
         <div className="absolute top-[20%] right-[-5%] w-[40vw] h-[40vw] bg-amber-500/3 rounded-full blur-[130px]"></div>
@@ -226,7 +226,7 @@ export function App() {
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
       </div>
 
-      {/* HEADER SECTION */}
+      {/* HEADER SECTION (Top Navigation Branding) */}
       <header className="relative z-40 border-b border-white/5 bg-black/60 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <button 
@@ -248,6 +248,8 @@ export function App() {
           </button>
 
           <div className="flex items-center space-x-3 text-xs">
+            
+            {/* HIGH-CONVERTING EYE-CATCHING BLOG HUD BUTTON */}
             <motion.button
               type="button"
               onClick={handleNavigateToBlog}
@@ -267,6 +269,7 @@ export function App() {
               <span>SOLAR INSIGHTS HUB</span>
             </motion.button>
 
+            {/* Elegant glassmorphic Currency & Country Dropdown */}
             <div className="relative pr-1">
               <button
                 type="button"
@@ -358,6 +361,7 @@ export function App() {
             transition={{ duration: 0.3 }}
             className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-8"
           >
+            {/* TOP INTRO BANNER HERO COMPONENT */}
             <div className="relative glass-panel p-6 sm:p-8 rounded-[28px] overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
               <div className="max-w-2xl">
@@ -382,7 +386,10 @@ export function App() {
               </div>
             </div>
 
+            {/* INTERACTIVE COMPONENT COMMAND GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* LEFT INPUT CONTROLS */}
               <section id="savings-calibration" className="lg:col-span-5 flex flex-col gap-6 w-full">
                 <div className="relative glass-panel rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                   <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/40 to-transparent"></div>
@@ -463,10 +470,15 @@ export function App() {
                     </div>
                   </div>
 
+                  {/* ORIENTATION HOOK SELECTORS */}
                   <div className="space-y-3 mt-6 pt-5 border-t border-slate-850/60">
                     <label className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
                       Roof Orientation Multiplier
+                      <span className="text-slate-500 hover:text-slate-400 cursor-pointer">
+                        <HelpCircle className="w-3.5 h-3.5" title="South orientation absorbs maximum photon counts." />
+                      </span>
                     </label>
+
                     <div className="grid grid-cols-2 gap-2.5">
                       {(['south', 'west', 'east', 'north'] as RoofOrientation[]).map((orientation) => {
                         const isSelected = state.roofOrientation === orientation;
@@ -479,28 +491,120 @@ export function App() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className={`px-4 py-3 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
-                              isSelected ? 'bg-slate-950/90 border-amber-500/50' : 'bg-slate-950/45 border-slate-850'
+                              isSelected
+                                ? 'bg-slate-950/90 border-amber-500/50 shadow-inner'
+                                : 'bg-slate-950/45 border-slate-850 hover:bg-slate-950/80 hover:border-slate-800'
                             }`}
                           >
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center column">
                               <span className={`text-xs font-extrabold capitalize ${isSelected ? 'text-amber-400' : 'text-slate-300'}`}>
                                 {orientation}
                               </span>
-                              <span className="text-[9px] font-mono text-slate-500">{orientationFactors[orientation]}</span>
+                              <span className={`text-[9px] font-mono ${isSelected ? 'text-amber-400 font-extrabold' : 'text-slate-500'}`}>
+                                {orientationFactors[orientation]}
+                              </span>
                             </div>
+                            <div className="text-[9px] text-slate-450 mt-1.5 font-sans leading-tight truncate">
+                              {orientation === 'south' && 'Maximum Daily Yield'}
+                              {orientation === 'west' && 'Peak Evening Supply'}
+                              {orientation === 'east' && 'High Morning Yield'}
+                              {orientation === 'north' && 'Standard Ambient Production'}
+                            </div>
+                            {isSelected && <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-gradient-to-b from-amber-550 to-yellow-500"></div>}
                           </motion.button>
                         );
                       })}
                     </div>
                   </div>
+
+                  {/* ADVANCED CALIBRATORS ELEMENT */}
+                  <div className="mt-5 pt-3.5 border-t border-slate-850/60">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                      className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 py-1 font-mono transition-colors duration-200"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <ChevronRight className={`w-3.5 h-3.5 text-amber-500 transition-transform duration-300 ${showAdvanced ? 'rotate-90' : ''}`} />
+                        {showAdvanced ? 'Hide Advanced Parameters' : 'Show Advanced Parameters'}
+                      </span>
+                      <span className="text-[10px] text-slate-600 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">
+                        Utility Rate, Panel Wattage
+                      </span>
+                    </button>
+
+                    <AnimatePresence>
+                      {showAdvanced && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="overflow-hidden mt-3 pt-3.5 border-t border-slate-850/30 space-y-4"
+                        >
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs">
+                              <label htmlFor="utility-rate-input" className="text-slate-400 font-semibold">Grid Electricity Rate</label>
+                              <span className="font-mono text-amber-400 font-bold">{formatRate(state.utilityRate)}/kWh</span>
+                            </div>
+                            <input
+                              id="utility-rate-input"
+                              type="range"
+                              min={minRate}
+                              max={maxRate}
+                              step={stepRate}
+                              value={state.utilityRate}
+                              onChange={handleRateChange}
+                              className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5 pt-1">
+                            <div className="flex justify-between items-center text-xs">
+                              <label className="text-slate-400 font-semibold font-sans">Photovoltaic Rated Panel Capacity</label>
+                              <span className="font-mono text-amber-400 font-bold">{state.panelCapacity} Watts</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {[380, 400, 420].map((watt) => (
+                                <button
+                                  key={watt}
+                                  type="button"
+                                  onClick={() => setState((prev) => ({ ...prev, panelCapacity: watt }))}
+                                  className={`py-1 text-[11px] font-mono rounded border ${
+                                    state.panelCapacity === watt
+                                      ? 'bg-amber-400/10 text-amber-300 border-amber-400/40'
+                                      : 'bg-slate-950 text-slate-500 border-slate-850 hover:text-slate-400'
+                                  }`}
+                                >
+                                  {watt}W {watt === 400 ? ' (Std)' : ''}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 <BillAnalyzer onDataExtracted={handleBillExtracted} currency={currency} currencySymbol={currencySymbol} />
-                <SolarVisualizer panelsNeeded={results.panelsNeeded} systemSizeKw={results.systemSizeKw} sunHours={state.sunHours} onSunHoursChange={handleSunHoursChange} equivalentTrees={results.equivalentTrees} carbonReducedTons={results.carbonReducedTons} roofOrientation={state.roofOrientation} />
+                <SolarVisualizer
+                  panelsNeeded={results.panelsNeeded}
+                  systemSizeKw={results.systemSizeKw}
+                  sunHours={state.sunHours}
+                  onSunHoursChange={handleSunHoursChange}
+                  equivalentTrees={results.equivalentTrees}
+                  carbonReducedTons={results.carbonReducedTons}
+                  roofOrientation={state.roofOrientation}
+                />
               </section>
 
+              {/* RIGHT OUTPUT EVALUATION PANEL */}
               <section className="lg:col-span-7 flex flex-col gap-6 w-full">
-                <div className="glass-panel border-amber-500/20 rounded-[28px] p-7 relative overflow-hidden flex flex-col min-h-[180px] justify-between group">
+                <div className="glass-panel border-amber-500/20 rounded-[28px] p-7 relative overflow-hidden shadow-[0_8px_32px_rgba(245,158,11,0.06)] flex flex-col min-h-[180px] justify-between group">
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                  <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                     <div>
                       <span className="text-[9px] font-mono text-amber-400 uppercase tracking-[0.12em] font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 w-max">
@@ -509,44 +613,101 @@ export function App() {
                       </span>
                       <h2 className="text-lg font-glass-title font-bold tracking-tight mt-3">Estimated Yearly Savings</h2>
                     </div>
+                    <span className="text-[9px] font-mono text-slate-450 bg-black border border-white/5 px-2.5 py-1 rounded-md">Formula: Bill * 12 * 95%</span>
                   </div>
 
                   <div className="my-4 flex items-baseline flex-wrap gap-2">
                     <span className="text-5xl sm:text-6xl font-glass-highlight-amber font-bold tracking-tight">{formatCurrency(results.yearlySavings)}</span>
+                    <span className="text-xs font-glass-body tracking-wide uppercase font-semibold">accumulated annually</span>
                   </div>
-                  <p className="text-xs text-slate-400 border-t border-white/5 pt-4">
-                    Adjusting grid values yields a proportional clean energy accumulation sequence.
+
+                  <p className="text-xs sm:text-sm font-glass-body leading-relaxed border-t border-white/5 pt-4 flex items-start gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 translate-y-1.5 inline-block"></span>
+                    <span>
+                      Adjusting your electricity costs offsets energy charges by <strong>95%</strong>. Generating solar power on-site is projected to yield <strong className="font-glass-mono-amber">{formatCurrency(results.yearlySavings / 12)}</strong> monthly net utility credits.
+                    </span>
                   </p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2">
-                  <button onClick={() => setActiveTab('financial')} className={`py-2.5 text-xs font-extrabold rounded-xl ${activeTab === 'financial' ? 'bg-slate-900 text-slate-100' : 'text-slate-400'}`}>Financial</button>
-                  <button onClick={() => setActiveTab('environmental')} className={`py-2.5 text-xs font-extrabold rounded-xl ${activeTab === 'environmental' ? 'bg-slate-900 text-slate-100' : 'text-slate-400'}`}>Environmental</button>
+                <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2 shadow-inner">
+                  <motion.button
+                    type="button"
+                    onClick={() => setActiveTab('financial')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                      activeTab === 'financial' ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <DollarSign className="w-4 h-4 text-amber-400" />
+                    Financial Projections
+                  </motion.button>
+                  
+                  <motion.button
+                    type="button"
+                    onClick={() => setActiveTab('environmental')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                      activeTab === 'environmental' ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Trees className="w-4 h-4 text-amber-400" />
+                    Environmental Impact
+                  </motion.button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {activeTab === 'financial' ? (
-                    <>
-                      <MetricCard label="Net Hardware Investment" value={formatCurrency(results.netCost)} subValue={`Gross: ${formatCurrency(results.estimatedCost)}`} icon={DollarSign} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
-                      <MetricCard label="Payback Break-Even" value={`${results.paybackPeriodYears} Years`} subValue="Capital recovery line threshold" icon={Scale} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
-                    </>
+                    <React.Fragment key="financial-metrics">
+                      <MetricCard label="Net Hardware Investment" value={formatCurrency(results.netCost)} subValue={`Initial gross: ${formatCurrency(results.estimatedCost)}`} icon={DollarSign} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
+                      <MetricCard label="Payback Break-Even" value={`${results.paybackPeriodYears} Years`} subValue={`Break-even year: ${new Date().getFullYear() + Math.ceil(results.paybackPeriodYears)}`} icon={Scale} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
+                      <MetricCard label={country.incentiveName} value={formatCurrency(results.federalIncentive)} subValue={country.incentiveDesc} icon={Award} iconColorClass="text-yellow-400" bgColorClass="bg-yellow-500/10" borderColorClass="border-slate-850" />
+                      <MetricCard label="25-Year Cumulative Yield" value={formatCurrency(results.lifetimeSavings25Years)} subValue="Assuming standard utility rise grid" icon={TrendingUp} iconColorClass="text-amber-500" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
+                    </React.Fragment>
                   ) : (
-                    <>
-                      <MetricCard label="CO2 Offset Yearly" value={`${results.carbonReducedTons} Tons`} subValue="Avoided traditional production grid" icon={Trees} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
-                      <MetricCard label="Clean Energy Generated" value={`${Math.round(results.systemSizeKw * state.sunHours * 365 * 0.8).toLocaleString()} kWh/yr`} subValue="Active photon calculation metrics" icon={ArrowUpRight} iconColorClass="text-teal-400" bgColorClass="bg-teal-500/10" borderColorClass="border-slate-850" />
-                    </>
+                    <React.Fragment key="environmental-metrics">
+                      <MetricCard label="CO2 Offset Yearly" value={`${results.carbonReducedTons} Metric Tons`} subValue="Avoided traditional power burning" icon={Trees} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
+                      <MetricCard label="Equivalent Trees Grown" value={`${results.equivalentTrees} Trees`} subValue="Carbon sequestration over 10yr period" icon={Sun} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
+                      <MetricCard label="Standard Generator Capacity" value={`${results.systemSizeKw.toFixed(1)} kW Peak`} subValue={`Fitted with ${results.panelsNeeded} solid glass panels`} icon={CloudLightning} iconColorClass="text-indigo-400" bgColorClass="bg-indigo-500/10" borderColorClass="border-slate-850" />
+                      
+                      {/* ENHANCED SAFE CODE NODE - INLINE CONVERSION METRIC VALUE PASSED EXPLICITLY TO SATISFY TYPESCRIPT ACCURACY */}
+                      <MetricCard
+                        label="Clean Energy Generated"
+                        value={`${Math.round(results.systemSizeKw * state.sunHours * 365 * 0.8).toLocaleString()} kWh/yr`}
+                        subValue="Powers direct home appliance cycle"
+                        icon={ArrowUpRight}
+                        iconColorClass="text-teal-400"
+                        bgColorClass="bg-teal-500/10"
+                        borderColorClass="border-slate-850"
+                      />
+                    </React.Fragment>
                   )}
                 </div>
 
                 <SavingsChart results={results} monthlyBill={state.monthlyBill} currency={currency} currencySymbol={currencySymbol} />
               </section>
             </div>
+
+            <div className="max-w-7xl mx-auto px-4 pb-8 relative z-20">
+              <SolarHardwareStore country={country} results={results} panelsNeeded={results.panelsNeeded} systemSizeKw={results.systemSizeKw} />
+            </div>
           </motion.main>
         )}
 
+        {/* RECOGNIZED CALL BACK BINDINGS COMPILING SMOOTH NAVIGATION HOOKS */}
         {currentView === 'blog' && (
-          <motion.div key="blog-hub-view" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}>
-            <BlogHub onSelectArticle={handleNavigateToArticle} onBack={handleNavigateToHome} />
+          <motion.div 
+            key="blog-hub-view" 
+            initial={{ opacity: 0, y: 15 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -15 }} 
+            transition={{ duration: 0.3 }}
+          >
+            <BlogHub 
+              onSelectArticle={handleNavigateToArticle} 
+              onBack={handleNavigateToHome} 
+            />
           </motion.div>
         )}
 
@@ -557,18 +718,34 @@ export function App() {
         )}
       </AnimatePresence>
 
-      <footer className="border-t border-white/5 bg-black py-10 mt-10 text-slate-500 text-xs text-center z-10">
-        <div className="flex justify-center gap-6 mb-4">
-          <button onClick={handleNavigateToHome} className="hover:text-amber-400 font-mono">HOME</button>
-          <button onClick={handleNavigateToBlog} className="hover:text-amber-400 font-mono">HUB</button>
-          <button onClick={() => handleOpenLegal('privacy')} className="hover:text-amber-400 font-mono">PRIVACY</button>
-          <button onClick={() => handleOpenLegal('terms')} className="hover:text-amber-400 font-mono">TERMS</button>
+      {/* FOOTER ANCHOR MATRIX LAYER */}
+      <footer className="border-t border-white/5 bg-black py-10 mt-10 relative z-10 text-slate-500/80 text-xs text-center">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-mono font-semibold tracking-wider text-slate-400">
+            <button onClick={handleNavigateToHome} className="hover:text-amber-400 transition-colors cursor-pointer">HOME FORECASTER</button>
+            <button onClick={handleNavigateToBlog} className="hover:text-amber-400 transition-colors cursor-pointer">INSIGHTS & ARTICLES</button>
+            <button type="button" onClick={() => handleOpenLegal('privacy')} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-mono font-semibold text-[11px] tracking-wider">PRIVACY COMPLIANCE</button>
+            <button type="button" onClick={() => handleOpenLegal('terms')} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-mono font-semibold text-[11px] tracking-wider">TERMS OF USE</button>
+          </div>
+
+          <div className="max-w-2xl text-center space-y-2 mt-2">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-slate-400">Technical Calculation Disclosures</p>
+            <p className="leading-relaxed text-[11px] font-glass-body-muted">
+              Solar energy production calculations incorporate standard irradiance coefficients under optimized peak sunshine profiles (sun nodes adjustable from 3.0 to 6.5 hours). Production yields model standard System Loss factors of 20% to account for inverter conversion, thermal heat losses, and cable drag resistance. {country.disclosureText}
+            </p>
+            <p className="text-[10px] text-slate-600">&copy; {new Date().getFullYear()} Grid Pulse AI. All simulated parameters are diagnostic calculations.</p>
+          </div>
         </div>
-        <p>&copy; {new Date().getFullYear()} Grid Pulse AI. All rights reserved.</p>
       </footer>
 
       <AIEnergyAdvisor monthlyBill={state.monthlyBill} sunHours={state.sunHours} results={results} roofOrientation={state.roofOrientation} billExtractedData={billData} currency={currency} currencySymbol={currencySymbol} />
-      <LegalModal isOpen={isLegalModalOpen} type={legalModalType} onClose={() => setIsLegalModalOpen(false)} />
+      
+      {/* LEGAL LAYER COMPLIANCE POPUP DRAWER MODALS */}
+      <LegalModal 
+        isOpen={isLegalModalOpen} 
+        type={legalModalType} 
+        onClose={() => setIsLegalModalOpen(false)} 
+      />
     </div>
   );
 }
