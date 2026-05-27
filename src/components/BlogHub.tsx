@@ -1,14 +1,15 @@
 // src/components/BlogHub.tsx
 import React, { useState } from 'react';
 import { articlesData, Article } from '../data/articles';
-import { BookOpen, Calendar, ArrowRight, ChevronDown, TrendingUp } from 'lucide-react';
+import { BookOpen, Calendar, ArrowRight, ChevronDown, TrendingUp, ChevronLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface BlogHubProps {
   onSelectArticle: (id: string) => void;
+  onBack: () => void; // Added property receiver hook
 }
 
-export default function BlogHub({ onSelectArticle }: BlogHubProps) {
+export default function BlogHub({ onSelectArticle, onBack }: BlogHubProps) {
   const [visibleCount, setVisibleCount] = useState<number>(6);
   const trendingArticles = articlesData.slice(0, visibleCount);
 
@@ -19,6 +20,15 @@ export default function BlogHub({ onSelectArticle }: BlogHubProps) {
   return (
     <div className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-12">
       
+      {/* GLOWING RETURN ANCHOR LINK - FIXES THE COLD NAVIGATION BUG */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-[11px] font-mono font-bold tracking-wider text-slate-400 hover:text-amber-400 transition-colors mb-6 group cursor-pointer"
+      >
+        <ChevronLeft className="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" />
+        RETURN TO FORECASTER COMMAND TERMINAL
+      </button>
+
       {/* Premium Hub Header Hero Frame */}
       <div className="relative glass-panel p-8 rounded-[28px] overflow-hidden mb-12 border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
