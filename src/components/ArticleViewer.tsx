@@ -1,6 +1,7 @@
 // src/components/ArticleViewer.tsx
+import React from 'react';
 import { articlesData } from '../data/articles';
-import AdPlaceholder from './AdPlaceholder'; // Pulling in your existing placeholder file!
+import { ChevronLeft, ShieldCheck } from 'lucide-react';
 
 interface ArticleViewerProps {
   articleId: string;
@@ -12,50 +13,62 @@ export default function ArticleViewer({ articleId, onBack }: ArticleViewerProps)
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
-        <p className="text-neutral-400 mb-4">Resource path not found.</p>
-        <button onClick={onBack} className="text-emerald-400 font-medium">Return Home</button>
+      <div className="relative z-10 flex-grow max-w-3xl w-full mx-auto px-4 py-20 text-center">
+        <p className="text-slate-400 font-mono">Data pipeline node missing.</p>
+        <button onClick={onBack} className="text-amber-400 text-xs mt-4 font-bold underline cursor-pointer">RETURN TO INDEX</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-neutral-200 px-4 py-12 md:py-20">
-      <div className="max-w-3xl mx-auto">
-        {/* Navigation Return Hook */}
-        <button 
-          onClick={onBack}
-          className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors mb-8 group font-mono"
-        >
-          <span className="transform group-hover:-translate-x-1 transition-transform">←</span> BACK TO RESOURCES
-        </button>
+    <div className="relative z-10 flex-grow max-w-3xl w-full mx-auto px-4 py-12">
+      
+      {/* Return Back Button Navigation Action */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-[11px] font-mono font-bold tracking-wider text-slate-400 hover:text-amber-400 transition-colors mb-8 group cursor-pointer"
+      >
+        <ChevronLeft className="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" />
+        BACK TO KNOWLEDGE BASE
+      </button>
 
-        {/* Header Metadata */}
-        <p className="text-xs text-emerald-400 font-mono tracking-widest uppercase mb-3">{article.date} // INSIGHTS</p>
-        <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-8">
+      {/* Main Core Text Article Wrapper */}
+      <article className="glass-panel rounded-[32px] p-6 sm:p-10 border border-white/5 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+        
+        {/* Article Metadata Frame */}
+        <div className="flex items-center gap-2 text-[10px] font-mono text-amber-400 uppercase tracking-widest mb-4">
+          <span>{article.date}</span>
+          <span>•</span>
+          <span>TECHNICAL FORECAST</span>
+        </div>
+
+        <h1 className="text-2xl sm:text-4xl font-glass-title font-black text-slate-100 tracking-tight leading-tight mb-8">
           {article.title}
         </h1>
 
-        {/* Feature Hero Frame */}
-        <div className="w-full h-64 md:h-96 rounded-2xl overflow-hidden border border-neutral-800 mb-10">
-          <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+        {/* Big Visual Header Hero Frame */}
+        <div className="w-full aspect-video rounded-2xl border border-white/5 overflow-hidden bg-slate-900 mb-10 shadow-inner">
+          <img src={article.image} alt={article.title} className="w-full h-full object-cover opacity-90" />
         </div>
 
-        {/* Monetization Block 1 */}
-        <div className="my-6">
-          <AdPlaceholder />
+        {/* FUTURE ADSENSE REAL ESTATE HOOK 1 */}
+        <div className="w-full bg-slate-950/90 border border-dashed border-white/10 rounded-xl p-4 my-8 text-center text-[10px] font-mono text-slate-600 flex items-center justify-center gap-2 tracking-widest uppercase">
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-700" />
+          Google AdSense Engine Placeholder Unit [Top Banner]
         </div>
 
-        {/* Body Copy Layout Container */}
-        <div className="prose prose-invert max-w-none text-base md:text-lg text-neutral-300 leading-relaxed space-y-6 whitespace-pre-wrap font-sans">
+        {/* Longform Paragraph Typography Core Body */}
+        <div className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans space-y-6 whitespace-pre-wrap">
           {article.content}
         </div>
 
-        {/* Monetization Block 2 */}
-        <div className="mt-12 pt-8 border-t border-neutral-900">
-          <AdPlaceholder />
+        {/* FUTURE ADSENSE REAL ESTATE HOOK 2 */}
+        <div className="w-full bg-slate-950/90 border border-dashed border-white/10 rounded-xl p-4 mt-12 text-center text-[10px] font-mono text-slate-600 flex items-center justify-center gap-2 tracking-widest uppercase">
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-700" />
+          Google AdSense Engine Placeholder Unit [Bottom Banner]
         </div>
-      </div>
+
+      </article>
     </div>
   );
 }
