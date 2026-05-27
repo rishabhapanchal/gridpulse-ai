@@ -34,15 +34,15 @@ import BillAnalyzer, { ExtractedBillData } from './components/BillAnalyzer';
 import { COUNTRIES, CountryConfig } from './utils/countryConfig';
 import SolarHardwareStore from './components/SolarHardwareStore';
 
-// BLOG REAL ESTATE CORE MODULES
+// BLOG CONTENT REAL ESTATE MODULES
 import BlogHub from './components/BlogHub';
 import ArticleViewer from './components/ArticleViewer';
 
-export default function App() {
+export function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
-  // USER INTERFACE LAYER NAVIGATION STATE
+  // USER INTERFACE ROUTING VIEW STATE CONTROLLER
   const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
   const [selectedArticleId, setSelectedArticleId] = useState<string>('');
 
@@ -103,7 +103,7 @@ export default function App() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [billData, setBillData] = useState<ExtractedBillData | null>(null);
 
-  // CORE INTERACTION LAYOUT VIEW CHANGERS
+  // INTERACTIVE VIEW PORT SWITCH HOOKS
   const handleNavigateToBlog = () => {
     setCurrentView('blog');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -169,18 +169,15 @@ export default function App() {
       let scaledBill = Math.round(prev.monthlyBill * ratio);
       let scaledRate = Number((prev.utilityRate * ratio).toFixed(2));
 
-      // Clamp values to stay within the new country's slider limits
       scaledBill = Math.max(newCountry.minBill, Math.min(newCountry.maxBill, scaledBill));
       scaledRate = Math.max(newCountry.minRate, Math.min(newCountry.maxRate, scaledRate));
 
-      // If the user was just on the old country's default, switch directly to the new country's default!
       const wasAtOldDefaultBill = Math.abs(prev.monthlyBill - oldCountry.defaultMonthlyBill) < (oldCountry.stepBill * 1.5);
       const finalBill = wasAtOldDefaultBill ? newCountry.defaultMonthlyBill : scaledBill;
 
       const wasAtOldDefaultRate = Math.abs(prev.utilityRate - oldCountry.defaultUtilityRate) < 0.05;
       const finalRate = wasAtOldDefaultRate ? newCountry.defaultUtilityRate : scaledRate;
 
-      // Adjust average solar sun hours to regional averages unless specifically customized
       const hasCustomSunHours = prev.sunHours !== oldCountry.defaultSunHours;
       const finalSunHours = hasCustomSunHours ? prev.sunHours : newCountry.defaultSunHours;
 
@@ -239,7 +236,6 @@ export default function App() {
         <div className="absolute top-[-10%] left-[5%] w-[45vw] h-[45vw] bg-amber-500/3 rounded-full blur-[140px]"></div>
         <div className="absolute top-[20%] right-[-5%] w-[40vw] h-[40vw] bg-amber-500/3 rounded-full blur-[130px]"></div>
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_45%,#000000_100%)]"></div>
-        {/* Fine Star Tech Grid overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
       </div>
 
@@ -266,7 +262,7 @@ export default function App() {
 
           <div className="flex items-center space-x-3 text-xs">
             
-            {/* NEW HIGH-CONVERTING, ATTRACTIVE INSIGHTS TRIGGER BUTTON */}
+            {/* HIGH-CONVERTING EYE-CATCHING BLOG HUD BUTTON */}
             <motion.button
               type="button"
               onClick={handleNavigateToBlog}
@@ -274,16 +270,14 @@ export default function App() {
               whileTap={{ scale: 0.98 }}
               className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-black tracking-wider uppercase transition-all duration-300 cursor-pointer border overflow-hidden group ${
                 currentView === 'blog' || currentView === 'article'
-                  ? 'bg-amber-500 text-black border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.4)] font-extrabold'
+                  ? 'bg-amber-500 text-black border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
                   : 'bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent text-amber-400 border-amber-500/40 hover:border-amber-400'
               }`}
             >
-              {/* Premium micro flash alert badge indicator */}
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
               </span>
-
               <BookOpen className={`w-3.5 h-3.5 ${currentView === 'blog' || currentView === 'article' ? 'text-black' : 'text-amber-400 animate-pulse'}`} />
               <span>SOLAR INSIGHTS HUB</span>
             </motion.button>
@@ -303,12 +297,7 @@ export default function App() {
               <AnimatePresence>
                 {isCountryDropdownOpen && (
                   <React.Fragment>
-                    {/* Invisible clickaway handler */}
-                    <div 
-                      className="fixed inset-0 z-40 cursor-default" 
-                      onClick={() => setIsCountryDropdownOpen(false)}
-                    />
-                    
+                    <div className="fixed inset-0 z-40 cursor-default" onClick={() => setIsCountryDropdownOpen(false)} />
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -329,7 +318,7 @@ export default function App() {
                               onClick={() => handleCountryChange(c.code)}
                               className={`w-full text-left flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium font-sans transition-all duration-200 cursor-pointer ${
                                 isSelected
-                                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/20'
+                                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
                                   : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900 border border-transparent'
                               }`}
                             >
@@ -344,9 +333,7 @@ export default function App() {
                                   </div>
                                 </div>
                               </span>
-                              {isSelected && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                              )}
+                              {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>}
                             </button>
                           );
                         })}
@@ -361,25 +348,25 @@ export default function App() {
               Irradiance Model: v4.12
             </span>
             {apiStatus.status === 'checking' && (
-              <span className="bg-slate-900 text-slate-400 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-slate-800 uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.05)] cursor-help animate-pulse" title="Testing core backend connection...">
+              <span className="bg-slate-900 text-slate-400 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-slate-800 uppercase tracking-wider flex items-center gap-2 animate-pulse">
                 <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
                 Verifying Backend
               </span>
             )}
             {apiStatus.status === 'active' && (
-              <span className="bg-emerald-500/10 text-emerald-300 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-emerald-500/25 uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.1)] cursor-help" title={apiStatus.details}>
+              <span className="bg-emerald-500/10 text-emerald-300 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-emerald-500/25 uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                 <span className="w-1.5 h-1.5 bg-emerald-450 rounded-full animate-ping"></span>
                 Core Active
               </span>
             )}
             {apiStatus.status === 'missing_key' && (
-              <span className="bg-rose-500/10 text-rose-350 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-rose-500/25 uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(244,63,94,0.1)] cursor-help animate-pulse animate-duration-1000" title={apiStatus.details}>
+              <span className="bg-rose-500/10 text-rose-350 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-rose-500/25 uppercase tracking-wider flex items-center gap-2 animate-pulse">
                 <span className="w-2 h-2 bg-rose-400 rounded-full"></span>
                 Secrets Error
               </span>
             )}
             {apiStatus.status === 'fallback_mode' && (
-              <span className="bg-amber-500/10 text-amber-350 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-amber-500/25 uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.1)] cursor-help" title={apiStatus.details}>
+              <span className="bg-amber-500/10 text-amber-350 px-2.5 py-1 rounded-full text-[10px] font-semibold border border-amber-500/25 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 bg-amber-400 rounded-full"></span>
                 Static Backup
               </span>
@@ -388,7 +375,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* RENDER VIEW PORTS ACCORDING TO USER ROUTING FILTERS */}
+      {/* CORE SWAP VIEW SWITCH LAYER */}
       <AnimatePresence mode="wait">
         {currentView === 'landing' && (
           <motion.main 
@@ -402,7 +389,6 @@ export default function App() {
             {/* TOP INTRO BANNER HERO COMPONENT */}
             <div className="relative glass-panel p-6 sm:p-8 rounded-[28px] overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
-              
               <div className="max-w-2xl">
                 <h1 className="text-xl sm:text-2xl font-glass-title font-bold tracking-tight text-slate-100 flex items-center gap-2">
                   Grid Pulse AI
@@ -425,10 +411,10 @@ export default function App() {
               </div>
             </div>
 
-            {/* PRIMARY BENTO GRID INTERACTIVE CORE LAYOUT */}
+            {/* INTERACTIVE COMPONENT COMMAND GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* LEFT COMMAND PANEL: USER CONTROLS */}
+              {/* LEFT INPUT CONTROLS */}
               <section id="savings-calibration" className="lg:col-span-5 flex flex-col gap-6 w-full">
                 <div className="relative glass-panel rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                   <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/40 to-transparent"></div>
@@ -442,12 +428,9 @@ export default function App() {
                         Savings Calibration
                       </h2>
                     </div>
-                    <span className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">
-                      System Inputs
-                    </span>
+                    <span className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">System Inputs</span>
                   </div>
 
-                  {/* CONTROL 1: MONTHLY ELECTRICITY BILL RANGE SLIDER */}
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
                       <label htmlFor="utility-bill-slider" className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
@@ -456,7 +439,6 @@ export default function App() {
                           <HelpCircle className="w-3.5 h-3.5" title="Your monthly grid power costs." />
                         </span>
                       </label>
-                      
                       <div className="flex items-baseline space-x-1">
                         <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
                           {formatCurrency(state.monthlyBill)}
@@ -488,9 +470,7 @@ export default function App() {
                     </div>
 
                     <div className="pt-1.5">
-                      <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">
-                        Quick Grid Presets
-                      </div>
+                      <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">Quick Grid Presets</div>
                       <div className="grid grid-cols-5 gap-2">
                         {billPresets.map((val) => {
                           const isSelected = state.monthlyBill === val;
@@ -515,7 +495,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* CONTROL 2: ROOF ORIENTATION TABS SELECTOR */}
+                  {/* ORIENTATION HOOK SELECTORS */}
                   <div className="space-y-3 mt-6 pt-5 border-t border-slate-850/60">
                     <label className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
                       Roof Orientation Multiplier
@@ -555,16 +535,14 @@ export default function App() {
                               {orientation === 'east' && 'High Morning Yield'}
                               {orientation === 'north' && 'Standard Ambient Production'}
                             </div>
-                            {isSelected && (
-                              <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-gradient-to-b from-amber-550 to-yellow-500"></div>
-                            )}
+                            {isSelected && <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-gradient-to-b from-amber-550 to-yellow-500"></div>}
                           </motion.button>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* ADVANCED CALIBRATORS DRAWER */}
+                  {/* ADVANCED CALIBRATORS ELEMENT */}
                   <div className="mt-5 pt-3.5 border-t border-slate-850/60">
                     <button
                       type="button"
@@ -634,10 +612,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* MULTIMODAL AI BILL ANALYZER */}
                 <BillAnalyzer onDataExtracted={handleBillExtracted} currency={currency} currencySymbol={currencySymbol} />
-
-                {/* ISOMETRIC 3D HOUSING SCHEMATIC HUD */}
                 <SolarVisualizer
                   panelsNeeded={results.panelsNeeded}
                   systemSizeKw={results.systemSizeKw}
@@ -649,10 +624,10 @@ export default function App() {
                 />
               </section>
 
-              {/* RIGHT COMMAND PANEL: LIVE DYNAMIC RESULTS CALCULATOR */}
+              {/* RIGHT OUTPUT EVALUATION PANEL */}
               <section className="lg:col-span-7 flex flex-col gap-6 w-full">
                 <div className="glass-panel border-amber-500/20 rounded-[28px] p-7 relative overflow-hidden shadow-[0_8px_32px_rgba(245,158,11,0.06)] flex flex-col min-h-[180px] justify-between group">
-                  <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/5 rounded-full blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
                   <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
 
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
@@ -661,22 +636,14 @@ export default function App() {
                         <CloudLightning className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
                         Real-time Assessment
                       </span>
-                      <h2 className="text-lg font-glass-title font-bold tracking-tight mt-3">
-                        Estimated Yearly Savings
-                      </h2>
+                      <h2 className="text-lg font-glass-title font-bold tracking-tight mt-3">Estimated Yearly Savings</h2>
                     </div>
-                    <span className="text-[9px] font-mono text-slate-450 bg-black border border-white/5 px-2.5 py-1 rounded-md">
-                      Formula: Bill * 12 * 95%
-                    </span>
+                    <span className="text-[9px] font-mono text-slate-450 bg-black border border-white/5 px-2.5 py-1 rounded-md">Formula: Bill * 12 * 95%</span>
                   </div>
 
                   <div className="my-4 flex items-baseline flex-wrap gap-2">
-                    <span className="text-5xl sm:text-6xl font-glass-highlight-amber font-bold tracking-tight">
-                      {formatCurrency(results.yearlySavings)}
-                    </span>
-                    <span className="text-xs font-glass-body tracking-wide uppercase font-semibold">
-                      accumulated annually
-                    </span>
+                    <span className="text-5xl sm:text-6xl font-glass-highlight-amber font-bold tracking-tight">{formatCurrency(results.yearlySavings)}</span>
+                    <span className="text-xs font-glass-body tracking-wide uppercase font-semibold">accumulated annually</span>
                   </div>
 
                   <p className="text-xs sm:text-sm font-glass-body leading-relaxed border-t border-white/5 pt-4 flex items-start gap-2">
@@ -687,7 +654,6 @@ export default function App() {
                   </p>
                 </div>
 
-                {/* TAB SELECTORS: INVESTMENT METRICS vs ECO IMPACT */}
                 <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2 shadow-inner">
                   <motion.button
                     type="button"
@@ -695,9 +661,7 @@ export default function App() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.96 }}
                     className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                      activeTab === 'financial'
-                        ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md'
-                        : 'text-slate-400 hover:text-slate-200'
+                      activeTab === 'financial' ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     <DollarSign className="w-4 h-4 text-amber-400" />
@@ -710,9 +674,7 @@ export default function App() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.96 }}
                     className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                      activeTab === 'environmental'
-                        ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md'
-                        : 'text-slate-400 hover:text-slate-200'
+                      activeTab === 'environmental' ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     <Trees className="w-4 h-4 text-amber-400" />
@@ -720,81 +682,21 @@ export default function App() {
                   </motion.button>
                 </div>
 
-                {/* METRIC GRID WRAPPER */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {activeTab === 'financial' ? (
                     <React.Fragment key="financial-metrics">
-                      <MetricCard
-                        label="Net Hardware Investment"
-                        value={formatCurrency(results.netCost)}
-                        subValue={`Initial gross: ${formatCurrency(results.estimatedCost)}`}
-                        icon={DollarSign}
-                        iconColorClass="text-amber-400"
-                        bgColorClass="bg-amber-500/10"
-                        borderColorClass="border-slate-850"
-                        glowingOrb
-                      />
-                      <MetricCard
-                        label="Payback Break-Even"
-                        value={`${results.paybackPeriodYears} Years`}
-                        subValue={`Break-even year: ${new Date().getFullYear() + Math.ceil(results.paybackPeriodYears)}`}
-                        icon={Scale}
-                        iconColorClass="text-amber-400"
-                        bgColorClass="bg-amber-500/10"
-                        borderColorClass="border-slate-850"
-                      />
-                      <MetricCard
-                        label={country.incentiveName}
-                        value={formatCurrency(results.federalIncentive)}
-                        subValue={country.incentiveDesc}
-                        icon={Award}
-                        iconColorClass="text-yellow-400"
-                        bgColorClass="bg-yellow-500/10"
-                        borderColorClass="border-slate-850"
-                      />
-                      <MetricCard
-                        label="25-Year Cumulative Yield"
-                        value={formatCurrency(results.lifetimeSavings25Years)}
-                        subValue="Assuming standard utility rise grid"
-                        icon={TrendingUp}
-                        iconColorClass="text-amber-500"
-                        bgColorClass="bg-amber-500/10"
-                        borderColorClass="border-slate-850"
-                        glowingOrb
-                      />
+                      <MetricCard label="Net Hardware Investment" value={formatCurrency(results.netCost)} subValue={`Initial gross: ${formatCurrency(results.estimatedCost)}`} icon={DollarSign} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
+                      <MetricCard label="Payback Break-Even" value={`${results.paybackPeriodYears} Years`} subValue={`Break-even year: ${new Date().getFullYear() + Math.ceil(results.paybackPeriodYears)}`} icon={Scale} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
+                      <MetricCard label={country.incentiveName} value={formatCurrency(results.federalIncentive)} subValue={country.incentiveDesc} icon={Award} iconColorClass="text-yellow-400" bgColorClass="bg-yellow-500/10" borderColorClass="border-slate-850" />
+                      <MetricCard label="25-Year Cumulative Yield" value={formatCurrency(results.lifetimeSavings25Years)} subValue="Assuming standard utility rise grid" icon={TrendingUp} iconColorClass="text-amber-500" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
                     </React.Fragment>
                   ) : (
                     <React.Fragment key="environmental-metrics">
-                      <MetricCard
-                        label="CO2 Offset Yearly"
-                        value={`${results.carbonReducedTons} Metric Tons`}
-                        subValue="Avoided traditional power burning"
-                        icon={Trees}
-                        iconColorClass="text-amber-400"
-                        bgColorClass="bg-amber-500/10"
-                        borderColorClass="border-slate-850"
-                        glowingOrb
-                      />
-                      <MetricCard
-                        label="Equivalent Trees Grown"
-                        value={`${results.equivalentTrees} Trees`}
-                        subValue="Carbon sequestration over 10yr period"
-                        icon={Sun}
-                        iconColorClass="text-amber-400"
-                        bgColorClass="bg-amber-500/10"
-                        borderColorClass="border-slate-850"
-                      />
-                      <MetricCard
-                        label="Standard Generator Capacity"
-                        value={`${results.systemSizeKw.toFixed(1)} kW Peak`}
-                        subValue={`Fitted with ${results.panelsNeeded} solid glass panels`}
-                        icon={CloudLightning}
-                        iconColorClass="text-indigo-400"
-                        bgColorClass="bg-indigo-500/10"
-                        borderColorClass="border-slate-850"
-                      />
+                      <MetricCard label="CO2 Offset Yearly" value={`${results.carbonReducedTons} Metric Tons`} subValue="Avoided traditional power burning" icon={Trees} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
+                      <MetricCard label="Equivalent Trees Grown" value={`${results.equivalentTrees} Trees`} subValue="Carbon sequestration over 10yr period" icon={Sun} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
+                      <MetricCard label="Standard Generator Capacity" value={`${results.systemSizeKw.toFixed(1)} kW Peak`} subValue={`Fitted with ${results.panelsNeeded} solid glass panels`} icon={CloudLightning} iconColorClass="text-indigo-400" bgColorClass="bg-indigo-500/10" borderColorClass="border-slate-850" />
                       
-                      {/* CACHE-SECURE RECTIFIED LINE: RUNNING CALCULATIONS EXPLICITLY INLINE TO SATISFY TYPESCRIPT COMPILE COMPLIANCE */}
+                      {/* ENHANCED SAFE CODE NODE - INLINE CONVERSION METRIC VALUE PASSED EXPLICITLY TO SATISFY TYPESCRIPT ACCURACY */}
                       <MetricCard
                         label="Clean Energy Generated"
                         value={`${Math.round(results.systemSizeKw * state.sunHours * 365 * 0.8).toLocaleString()} kWh/yr`}
@@ -808,55 +710,32 @@ export default function App() {
                   )}
                 </div>
 
-                {/* INTEGRATED SAVINGS AND INVESTMENT AREA LINE GRAPH */}
                 <SavingsChart results={results} monthlyBill={state.monthlyBill} currency={currency} currencySymbol={currencySymbol} />
               </section>
             </div>
 
-            {/* ECOSYSTEM HARDWARE MARKETPLACE */}
             <div className="max-w-7xl mx-auto px-4 pb-8 relative z-20">
-              <SolarHardwareStore
-                country={country}
-                results={results}
-                panelsNeeded={results.panelsNeeded}
-                systemSizeKw={results.systemSizeKw}
-              />
+              <SolarHardwareStore country={country} results={results} panelsNeeded={results.panelsNeeded} systemSizeKw={results.systemSizeKw} />
             </div>
           </motion.main>
         )}
 
-        {/* CONDITIONALLY RENDER THE RESOURCE HUB INDEX GRID */}
         {currentView === 'blog' && (
-          <motion.div
-            key="blog-hub-view"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key="blog-hub-view" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}>
             <BlogHub onSelectArticle={handleNavigateToArticle} />
           </motion.div>
         )}
 
-        {/* CONDITIONALLY RENDER THE DYNAMIC LONG-FORM ARTICLE VIEWER */}
         {currentView === 'article' && (
-          <motion.div
-            key="article-viewer-view"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key="article-viewer-view" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}>
             <ArticleViewer articleId={selectedArticleId} onBack={handleNavigateToBlog} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* FOOTER & DISCLOSURES COMPONENT */}
+      {/* FOOTER ANCHOR MATRIX LAYER */}
       <footer className="border-t border-white/5 bg-black py-10 mt-10 relative z-10 text-slate-500/80 text-xs text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-6">
-          
-          {/* ANCHOR NAVIGATION DIRECTORY BLOCK FOR TRAFFIC RETENTION AND LEGAL SAFETY */}
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-mono font-semibold tracking-wider text-slate-400">
             <button onClick={handleNavigateToHome} className="hover:text-amber-400 transition-colors cursor-pointer">HOME FORECASTER</button>
             <button onClick={handleNavigateToBlog} className="hover:text-amber-400 transition-colors cursor-pointer">INSIGHTS & ARTICLES</button>
@@ -865,29 +744,16 @@ export default function App() {
           </div>
 
           <div className="max-w-2xl text-center space-y-2 mt-2">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
-              Technical Calculation Disclosures
-            </p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-slate-400">Technical Calculation Disclosures</p>
             <p className="leading-relaxed text-[11px] font-glass-body-muted">
               Solar energy production calculations incorporate standard irradiance coefficients under optimized peak sunshine profiles (sun nodes adjustable from 3.0 to 6.5 hours). Production yields model standard System Loss factors of 20% to account for inverter conversion, thermal heat losses, and cable drag resistance. {country.disclosureText}
             </p>
-            <p className="text-[10px] text-slate-600">
-              &copy; {new Date().getFullYear()} Grid Pulse AI. All simulated parameters are diagnostic calculations.
-            </p>
+            <p className="text-[10px] text-slate-600">&copy; {new Date().getFullYear()} Grid Pulse AI. All simulated parameters are diagnostic calculations.</p>
           </div>
         </div>
       </footer>
 
-      {/* FLOATING AI ENERGY ADVISOR CHAT COMPONENT */}
-      <AIEnergyAdvisor
-        monthlyBill={state.monthlyBill}
-        sunHours={state.sunHours}
-        results={results}
-        roofOrientation={state.roofOrientation}
-        billExtractedData={billData}
-        currency={currency}
-        currencySymbol={currencySymbol}
-      />
+      <AIEnergyAdvisor monthlyBill={state.monthlyBill} sunHours={state.sunHours} results={results} roofOrientation={state.roofOrientation} billExtractedData={billData} currency={currency} currencySymbol={currencySymbol} />
     </div>
   );
 }
