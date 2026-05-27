@@ -1,22 +1,28 @@
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import {defineConfig} from 'vite';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
-export default defineConfig(() => {
-  return {
-    plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    cssInjectedByJsPlugin() // Safely inlines 10.8KB CSS into index.js
+  ],
+  build: {
+    minify: 'terser', // Optimizes chunk compression
+    terserOptions: {
+      compress: {
+        drop_console: true, // Drops console logs for production speed
+        drop_debugger: true
+      }
     },
-    server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
-    },
-  };
+    rollupOptions: {
+      output: {
+        // Prevents deep nested directory asset structures
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      }
+    }
+  }
 });
