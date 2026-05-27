@@ -45,6 +45,27 @@ export function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
+  const country = COUNTRIES.find((c) => c.code === selectedCountryCode) || COUNTRIES[0];
+  const currency = country.currency;
+  const currencySymbol = country.symbol;
+
+  // 🛠️ HOISTED HOOK LOGIC: Format currency numbers cleanly at the absolute top of the body
+  const formatCurrency = (val: number) => {
+    try {
+      return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
+        style: 'currency',
+        currency: country.currency,
+        maximumFractionDigits: 0,
+      }).format(val);
+    } catch (e) {
+      return `${country.symbol}${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    }
+  };
+
+  const formatRate = (val: number) => {
+    return `${country.symbol}${val.toFixed(2)}`;
+  };
+
   // USER INTERFACE ROUTING VIEW STATE CONTROLLER
   const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
   const [selectedArticleId, setSelectedArticleId] = useState<string>('');
@@ -93,15 +114,11 @@ export function App() {
       });
   }, []);
 
-  const country = COUNTRIES.find((c) => c.code === selectedCountryCode) || COUNTRIES[0];
-  const currency = country.currency;
-  const currencySymbol = country.symbol;
-
-  // 1. Define Primary State representing Solar Configuration parameters
+  // Define Primary State representing Solar Configuration parameters
   const [state, setState] = useState<CalculatorState>({
-    monthlyBill: 150,
-    sunHours: 4.5,
-    utilityRate: 0.18,
+    monthlyBill: country.defaultMonthlyBill || 150,
+    sunHours: country.defaultSunHours || 4.5,
+    utilityRate: country.defaultUtilityRate || 0.18,
     roofOrientation: 'south',
     panelCapacity: 400,
   });
@@ -141,7 +158,7 @@ export function App() {
     }));
   };
 
-  // 2. Perform math calculations based on active state parameters
+  // Perform math calculations based on active state parameters
   const results = calculateSolarSavings(state, country.typicalSolarCostPerWatt, country.incentiveRate);
 
   // Quick Preset values to easily jump to standard utility costs
@@ -214,6 +231,14 @@ export function App() {
       });
     }
   };
+
+  const minBill = country.minBill;
+  const maxBill = country.maxBill;
+  const stepBill = country.stepBill;
+
+  const minRate = country.minRate;
+  const maxRate = country.maxRate;
+  const stepRate = country.stepRate;
 
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
@@ -418,7 +443,7 @@ export function App() {
                         <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
                           {formatCurrency(state.monthlyBill)}
                         </span>
-                        <span className="text-xs font-mono text-slate-400">/mo</span>
+                        <span className="text-xs font-mono text-slate-450">/mo</span>
                       </div>
                     </div>
 
