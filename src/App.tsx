@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import {
   Sun,
   Zap,
@@ -11,11 +11,8 @@ import {
   Trees,
   CloudLightning,
   HelpCircle,
-  HelpCircle as InfoIcon,
   ChevronRight,
   TrendingUp,
-  MapPin,
-  Settings,
   Scale,
   Award,
   ArrowUpRight,
@@ -31,7 +28,7 @@ import SavingsChart from './components/SavingsChart';
 import MetricCard from './components/MetricCard';
 import AIEnergyAdvisor from './components/AIEnergyAdvisor';
 import BillAnalyzer, { ExtractedBillData } from './components/BillAnalyzer';
-import { COUNTRIES, CountryConfig } from './utils/countryConfig';
+import { COUNTRIES } from './utils/countryConfig';
 import SolarHardwareStore from './components/SolarHardwareStore';
 
 // BLOG CONTENT REAL ESTATE MODULES
@@ -44,12 +41,14 @@ import LegalModal from './components/LegalModal';
 export function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  
+  // React 19 Concurrent rendering hooks to offload heavy country-switching calculations from the main thread
+  const [, startTransition] = useTransition();
 
   const country = COUNTRIES.find((c) => c.code === selectedCountryCode) || COUNTRIES[0];
   const currency = country.currency;
   const currencySymbol = country.symbol;
 
-  // 🛠️ HOISTED HOOK LOGIC: Format currency numbers cleanly at the absolute top of the body
   const formatCurrency = (val: number) => {
     try {
       return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
@@ -79,15 +78,17 @@ export function App() {
     details?: string;
   }>({ status: 'checking' });
 
+  // FIXED: Cleaned up effect blocks
   React.useEffect(() => {
+    let isMounted = true;
+    
     fetch('/api/healthz')
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP Error ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
         return res.json();
       })
       .then((data) => {
+        if (!isMounted) return;
         if (data.status === 'ok' && data.hasGeminiKey) {
           setApiStatus({ 
             status: 'active', 
@@ -106,15 +107,18 @@ export function App() {
         }
       })
       .catch((err) => {
+        if (!isMounted) return;
         console.error('API Diagnostics Error:', err);
         setApiStatus({ 
           status: 'fallback_mode', 
           details: `Backend unreachable: ${err.message || 'Verification failed'}` 
         });
       });
+
+    return () => { isMounted = false; };
   }, []);
 
-  // Define Primary State representing Solar Configuration parameters
+  // Primary State representing Solar Configuration parameters
   const [state, setState] = useState<CalculatorState>({
     monthlyBill: country.defaultMonthlyBill || 150,
     sunHours: country.defaultSunHours || 4.5,
@@ -127,7 +131,6 @@ export function App() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [billData, setBillData] = useState<ExtractedBillData | null>(null);
 
-  // INTERACTIVE VIEW PORT SWITCH HOOKS
   const handleNavigateToBlog = () => {
     setCurrentView('blog');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -158,10 +161,7 @@ export function App() {
     }));
   };
 
-  // Perform math calculations based on active state parameters
   const results = calculateSolarSavings(state, country.typicalSolarCostPerWatt, country.incentiveRate);
-
-  // Quick Preset values to easily jump to standard utility costs
   const billPresets = country.presets;
 
   const handleBillChange = (val: number) => {
@@ -183,6 +183,7 @@ export function App() {
     setState((prev) => ({ ...prev, roofOrientation: orientation }));
   };
 
+  // OPTIMIZED: Uses React concurrent transitions to prevent deep ratio math loops from locking up visual sliders
   const handleCountryChange = (newCode: string) => {
     const newCountry = COUNTRIES.find((c) => c.code === newCode);
     if (!newCountry || newCountry.code === selectedCountryCode) return;
@@ -191,45 +192,46 @@ export function App() {
     setSelectedCountryCode(newCode);
     setIsCountryDropdownOpen(false);
 
-    // Scale existing state values to match the new country currency rates
     const ratio = newCountry.conversionRateFromUSD / oldCountry.conversionRateFromUSD;
 
-    setState((prev) => {
-      let scaledBill = Math.round(prev.monthlyBill * ratio);
-      let scaledRate = Number((prev.utilityRate * ratio).toFixed(2));
+    startTransition(() => {
+      setState((prev) => {
+        let scaledBill = Math.round(prev.monthlyBill * ratio);
+        let scaledRate = Number((prev.utilityRate * ratio).toFixed(2));
 
-      scaledBill = Math.max(newCountry.minBill, Math.min(newCountry.maxBill, scaledBill));
-      scaledRate = Math.max(newCountry.minRate, Math.min(newCountry.maxRate, scaledRate));
+        scaledBill = Math.max(newCountry.minBill, Math.min(newCountry.maxBill, scaledBill));
+        scaledRate = Math.max(newCountry.minRate, Math.min(newCountry.maxRate, scaledRate));
 
-      const wasAtOldDefaultBill = Math.abs(prev.monthlyBill - oldCountry.defaultMonthlyBill) < (oldCountry.stepBill * 1.5);
-      const finalBill = wasAtOldDefaultBill ? newCountry.defaultMonthlyBill : scaledBill;
+        const wasAtOldDefaultBill = Math.abs(prev.monthlyBill - oldCountry.defaultMonthlyBill) < (oldCountry.stepBill * 1.5);
+        const finalBill = wasAtOldDefaultBill ? newCountry.defaultMonthlyBill : scaledBill;
 
-      const wasAtOldDefaultRate = Math.abs(prev.utilityRate - oldCountry.defaultUtilityRate) < 0.05;
-      const finalRate = wasAtOldDefaultRate ? newCountry.defaultUtilityRate : scaledRate;
+        const wasAtOldDefaultRate = Math.abs(prev.utilityRate - oldCountry.defaultUtilityRate) < 0.05;
+        const finalRate = wasAtOldDefaultRate ? newCountry.defaultUtilityRate : scaledRate;
 
-      const hasCustomSunHours = prev.sunHours !== oldCountry.defaultSunHours;
-      const finalSunHours = hasCustomSunHours ? prev.sunHours : newCountry.defaultSunHours;
+        const hasCustomSunHours = prev.sunHours !== oldCountry.defaultSunHours;
+        const finalSunHours = hasCustomSunHours ? prev.sunHours : newCountry.defaultSunHours;
 
-      return {
-        ...prev,
-        monthlyBill: finalBill,
-        utilityRate: finalRate,
-        sunHours: finalSunHours,
-      };
-    });
-
-    if (billData) {
-      setBillData((prev) => {
-        if (!prev) return null;
-        const scaledBill = Math.round(prev.extractedBillAmount * ratio);
-        const scaledRate = Number((prev.utilityRate * ratio).toFixed(2));
         return {
           ...prev,
-          extractedBillAmount: Math.max(newCountry.minBill, Math.min(newCountry.maxBill, scaledBill)),
-          utilityRate: Math.max(newCountry.minRate, Math.min(newCountry.maxRate, scaledRate)),
+          monthlyBill: finalBill,
+          utilityRate: finalRate,
+          sunHours: finalSunHours,
         };
       });
-    }
+
+      if (billData) {
+        setBillData((prev) => {
+          if (!prev) return null;
+          const scaledBill = Math.round(prev.extractedBillAmount * ratio);
+          const scaledRate = Number((prev.utilityRate * ratio).toFixed(2));
+          return {
+            ...prev,
+            extractedBillAmount: Math.max(newCountry.minBill, Math.min(newCountry.maxBill, scaledBill)),
+            utilityRate: Math.max(newCountry.minRate, Math.min(newCountry.maxRate, scaledRate)),
+          };
+        });
+      }
+    });
   };
 
   const minBill = country.minBill;
@@ -243,7 +245,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
       
-      {/* GLOWING AMBIENT SPACE BACKGROUND EFFECTS (NO LAYOUT SHIFT) */}
+      {/* BACKGROUND GRAPHICS LAYER */}
       <div className="absolute top-0 left-0 w-full h-[600px] pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[5%] w-[45vw] h-[45vw] bg-amber-500/3 rounded-full blur-[140px]"></div>
         <div className="absolute top-[20%] right-[-5%] w-[40vw] h-[40vw] bg-amber-500/3 rounded-full blur-[130px]"></div>
@@ -251,7 +253,7 @@ export function App() {
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
       </div>
 
-      {/* HEADER SECTION (Top Navigation Branding) */}
+      {/* HEADER NAVBAR CONTAINER */}
       <header className="relative z-40 border-b border-white/5 bg-black/60 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <button 
@@ -273,8 +275,6 @@ export function App() {
           </button>
 
           <div className="flex items-center space-x-3 text-xs">
-            
-            {/* HIGH-CONVERTING EYE-CATCHING BLOG HUD BUTTON */}
             <motion.button
               type="button"
               onClick={handleNavigateToBlog}
@@ -294,7 +294,6 @@ export function App() {
               <span>SOLAR INSIGHTS HUB</span>
             </motion.button>
 
-            {/* Elegant glassmorphic Currency & Country Dropdown */}
             <div className="relative pr-1">
               <button
                 type="button"
@@ -375,7 +374,7 @@ export function App() {
         </div>
       </header>
 
-      {/* CORE SWAP VIEW SWITCH LAYER */}
+      {/* CORE CONTENT ROUTER LAYER */}
       <AnimatePresence mode="wait">
         {currentView === 'landing' && (
           <motion.main 
@@ -386,7 +385,7 @@ export function App() {
             transition={{ duration: 0.3 }}
             className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-8"
           >
-            {/* TOP INTRO BANNER HERO COMPONENT */}
+            {/* HERO MODULE */}
             <div className="relative glass-panel p-6 sm:p-8 rounded-[28px] overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
               <div className="max-w-2xl">
@@ -401,7 +400,7 @@ export function App() {
               <div className="flex shrink-0 items-center">
                 <div className="bg-slate-950/80 border border-slate-800 rounded-2xl px-4.5 py-3 flex items-center space-x-3.5 shadow-inner">
                   <div className="text-amber-400 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                    <Award className="w-5 h-5 animate-pulse" />
+                    <Award className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-[9px] font-mono text-slate-450 uppercase tracking-widest font-bold">Federal Incentive</div>
@@ -411,10 +410,10 @@ export function App() {
               </div>
             </div>
 
-            {/* INTERACTIVE COMPONENT COMMAND GRID */}
+            {/* DASHBOARD GRAPH MATRIX */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* LEFT INPUT CONTROLS */}
+              {/* LEFT COLUMN INTERACTIVE SYSTEMS */}
               <section id="savings-calibration" className="lg:col-span-5 flex flex-col gap-6 w-full">
                 <div className="relative glass-panel rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                   <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/40 to-transparent"></div>
@@ -422,7 +421,7 @@ export function App() {
                   <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
                     <div className="flex items-center space-x-2.5">
                       <div className="p-2 bg-black border border-white/10 text-amber-400 rounded-xl">
-                        <Settings className="w-4 h-4" />
+                        <Sun className="w-4 h-4" />
                       </div>
                       <h2 className="text-sm font-glass-title font-bold tracking-tight pb-0.5">
                         Savings Calibration
@@ -440,7 +439,7 @@ export function App() {
                         </span>
                       </label>
                       <div className="flex items-baseline space-x-1">
-                        <span className="text-2xl font-bold font-mono tracking-tight text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                        <span className="text-2xl font-bold font-mono tracking-tight text-amber-400">
                           {formatCurrency(state.monthlyBill)}
                         </span>
                         <span className="text-xs font-mono text-slate-450">/mo</span>
@@ -475,12 +474,10 @@ export function App() {
                         {billPresets.map((val) => {
                           const isSelected = state.monthlyBill === val;
                           return (
-                            <motion.button
+                            <button
                               key={val}
                               type="button"
                               onClick={() => handleBillChange(val)}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
                               className={`py-2 text-xs font-mono font-bold rounded-xl transition-all duration-300 border cursor-pointer ${
                                 isSelected
                                   ? 'bg-amber-500/10 text-amber-300 border-amber-500/40 shadow-inner'
@@ -488,14 +485,14 @@ export function App() {
                               }`}
                             >
                               {formatCurrency(val)}
-                            </motion.button>
+                            </button>
                           );
                         })}
                       </div>
                     </div>
                   </div>
 
-                  {/* ORIENTATION HOOK SELECTORS */}
+                  {/* ORIENTATION MULTIPLIERS */}
                   <div className="space-y-3 mt-6 pt-5 border-t border-slate-850/60">
                     <label className="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
                       Roof Orientation Multiplier
@@ -509,12 +506,10 @@ export function App() {
                         const isSelected = state.roofOrientation === orientation;
                         const orientationFactors = { south: '100%', west: '85%', east: '85%', north: '55%' };
                         return (
-                          <motion.button
+                          <button
                             key={orientation}
                             type="button"
                             onClick={() => handleOrientationChange(orientation)}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                             className={`px-4 py-3 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
                               isSelected
                                 ? 'bg-slate-950/90 border-amber-500/50 shadow-inner'
@@ -536,7 +531,7 @@ export function App() {
                               {orientation === 'north' && 'Standard Ambient Production'}
                             </div>
                             {isSelected && <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-gradient-to-b from-amber-550 to-yellow-500"></div>}
-                          </motion.button>
+                          </button>
                         );
                       })}
                     </div>
@@ -564,7 +559,7 @@ export function App() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.25 }}
+                          transition={{ duration: 0.2 }}
                           className="overflow-hidden mt-3 pt-3.5 border-t border-slate-850/30 space-y-4"
                         >
                           <div className="space-y-1.5">
@@ -633,7 +628,7 @@ export function App() {
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                     <div>
                       <span className="text-[9px] font-mono text-amber-400 uppercase tracking-[0.12em] font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 w-max">
-                        <CloudLightning className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+                        <CloudLightning className="w-3.5 h-3.5 text-amber-400" />
                         Real-time Assessment
                       </span>
                       <h2 className="text-lg font-glass-title font-bold tracking-tight mt-3">Estimated Yearly Savings</h2>
@@ -655,31 +650,27 @@ export function App() {
                 </div>
 
                 <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2 shadow-inner">
-                  <motion.button
+                  <button
                     type="button"
                     onClick={() => setActiveTab('financial')}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}
                     className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
                       activeTab === 'financial' ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     <DollarSign className="w-4 h-4 text-amber-400" />
                     Financial Projections
-                  </motion.button>
+                  </button>
                   
-                  <motion.button
+                  <button
                     type="button"
                     onClick={() => setActiveTab('environmental')}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}
                     className={`py-2.5 text-xs font-extrabold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
                       activeTab === 'environmental' ? 'bg-slate-900/80 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     <Trees className="w-4 h-4 text-amber-400" />
                     Environmental Impact
-                  </motion.button>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -695,8 +686,6 @@ export function App() {
                       <MetricCard label="CO2 Offset Yearly" value={`${results.carbonReducedTons} Metric Tons`} subValue="Avoided traditional power burning" icon={Trees} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" glowingOrb />
                       <MetricCard label="Equivalent Trees Grown" value={`${results.equivalentTrees} Trees`} subValue="Carbon sequestration over 10yr period" icon={Sun} iconColorClass="text-amber-400" bgColorClass="bg-amber-500/10" borderColorClass="border-slate-850" />
                       <MetricCard label="Standard Generator Capacity" value={`${results.systemSizeKw.toFixed(1)} kW Peak`} subValue={`Fitted with ${results.panelsNeeded} solid glass panels`} icon={CloudLightning} iconColorClass="text-indigo-400" bgColorClass="bg-indigo-500/10" borderColorClass="border-slate-850" />
-                      
-                      {/* ENHANCED SAFE CODE NODE - INLINE CONVERSION METRIC VALUE PASSED EXPLICITLY TO SATISFY TYPESCRIPT ACCURACY */}
                       <MetricCard
                         label="Clean Energy Generated"
                         value={`${Math.round(results.systemSizeKw * state.sunHours * 365 * 0.8).toLocaleString()} kWh/yr`}
@@ -720,7 +709,6 @@ export function App() {
           </motion.main>
         )}
 
-        {/* RECOGNIZED CALL BACK BINDINGS COMPILING SMOOTH NAVIGATION HOOKS */}
         {currentView === 'blog' && (
           <motion.div 
             key="blog-hub-view" 
@@ -743,12 +731,12 @@ export function App() {
         )}
       </AnimatePresence>
 
-      {/* FOOTER ANCHOR MATRIX LAYER */}
+      {/* FOOTER LAYER */}
       <footer className="border-t border-white/5 bg-black py-10 mt-10 relative z-10 text-slate-500/80 text-xs text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-6">
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-mono font-semibold tracking-wider text-slate-400">
-            <button onClick={handleNavigateToHome} className="hover:text-amber-400 transition-colors cursor-pointer">HOME FORECASTER</button>
-            <button onClick={handleNavigateToBlog} className="hover:text-amber-400 transition-colors cursor-pointer">INSIGHTS & ARTICLES</button>
+            <button onClick={handleNavigateToHome} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none">HOME FORECASTER</button>
+            <button onClick={handleNavigateToBlog} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none">INSIGHTS & ARTICLES</button>
             <button type="button" onClick={() => handleOpenLegal('privacy')} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-mono font-semibold text-[11px] tracking-wider">PRIVACY COMPLIANCE</button>
             <button type="button" onClick={() => handleOpenLegal('terms')} className="hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-mono font-semibold text-[11px] tracking-wider">TERMS OF USE</button>
           </div>
@@ -765,7 +753,6 @@ export function App() {
 
       <AIEnergyAdvisor monthlyBill={state.monthlyBill} sunHours={state.sunHours} results={results} roofOrientation={state.roofOrientation} billExtractedData={billData} currency={currency} currencySymbol={currencySymbol} />
       
-      {/* LEGAL LAYER COMPLIANCE POPUP DRAWER MODALS */}
       <LegalModal 
         isOpen={isLegalModalOpen} 
         type={legalModalType} 
