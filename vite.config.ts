@@ -7,17 +7,12 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // Tailwind v4 uses a dedicated framework compiler plugin
-    cssInjectedByJsPlugin() // Inlines the final Tailwind CSS styles directly into your JS bundle
+    tailwindcss(),
+    cssInjectedByJsPlugin()
   ],
   build: {
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    // Uses Vite's built-in minifier instead of requiring the extra terser package
+    minify: 'esbuild', 
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name]-[hash][extname]',
@@ -25,5 +20,9 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
       }
     }
+  },
+  // Tells esbuild to drop console/debugger lines during compilation
+  esbuild: {
+    drop: ['console', 'debugger'],
   }
 });
