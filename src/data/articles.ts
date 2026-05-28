@@ -93,29 +93,56 @@ const ArticleViewer: React.FC<ArticleViewerProps> = ({
         </button>
 
         {/* ACTIVATED HIGH-CONVERSION SHARE BUTTON */}
-        <button
-          onClick={handleShare}
-          className="p-2.5 rounded-full border border-white/10 bg-slate-900/40 hover:bg-white/5 text-slate-400 hover:text-amber-400 transition-all duration-200 shadow-md flex items-center justify-center group"
-          title="Share this article"
-          aria-label="Share article"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="18" 
-            height="18" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            className="transform group-hover:scale-105 transition-transform"
-          >
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-            <polyline points="16 6 12 2 8 6"/>
-            <line x1="12" y1="2" x2="12" y2="15"/>
-          </svg>
-        </button>
+<button
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Explicit inline execution matrix
+    const shareTitle = article.title;
+    const shareText = article.description || article.excerpt;
+    const shareUrl = `${window.location.origin}/?view=blog&article=${article.slug || article.id}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl,
+      })
+      .then(() => console.log("Successful share alignment"))
+      .catch((err) => console.log("Share skipped:", err));
+    } else {
+      // Direct browser fallback execution
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+          alert("Link copied to clipboard successfully!");
+        })
+        .catch((err) => {
+          console.error("Clipboard routing blocked:", err);
+        });
+    }
+  }}
+  className="p-2.5 rounded-full border border-white/10 bg-slate-900/40 hover:bg-white/5 text-slate-400 hover:text-amber-400 transition-all duration-200 shadow-md flex items-center justify-center group relative z-50 cursor-pointer"
+  title="Share this article"
+  aria-label="Share article"
+>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="18" 
+    height="18" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className="pointer-events-none"
+  >
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+    <polyline points="16 6 12 2 8 6"/>
+    <line x1="12" y1="2" x2="12" y2="15"/>
+  </svg>
+</button>
       </div>
 
       {/* ARTICLE CONTENT FRAMEWORK HERO */}
