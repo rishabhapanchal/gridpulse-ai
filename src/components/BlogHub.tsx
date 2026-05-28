@@ -1,111 +1,140 @@
-// src/components/BlogHub.tsx
 import React, { useState } from 'react';
-import { articlesData, Article } from '../data/articles';
-import { BookOpen, Calendar, ArrowRight, ChevronDown, TrendingUp, ChevronLeft } from 'lucide-react';
+import { BookOpen, ArrowLeft, Calendar, Clock, User } from 'lucide-react';
 import { motion } from 'motion/react';
+
+// Assuming you have a mock or imported data asset for articles
+// Replace this mock structure with your actual database or JSON import path if different
+const SAMPLE_ARTICLES = [
+  {
+    id: 'pm-surya-ghar',
+    title: 'Step-by-Step Guide: How to Track Your PM Surya Ghar Application Status',
+    excerpt: 'Learn how to navigate the national solar portal, interpret internal DISCOM engineering review logs, and avoid regional net-metering processing bottlenecks.',
+    date: '2026-05-27',
+    readTime: '6 min read',
+    author: 'Grid Pulse Analytics',
+    imageUrl: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'commercial-solar-roi',
+    title: 'Commercial Solar ROI: Calculating True Payback Periods for Industrial Arrays',
+    excerpt: 'A financial modeling deep-dive into accelerated depreciation curves, power purchase agreements, and grid-parity calculations.',
+    date: '2026-05-25',
+    readTime: '9 min read',
+    author: 'E. R. Panchal',
+    imageUrl: 'invalid-image-url-test-package.jpg' // This will trigger the automatic fallback safely
+  },
+  {
+    id: 'bifacial-vs-monofacial',
+    title: 'Bifacial vs. Monofacial Solar Panels: Which Yields Better ROI in 2026?',
+    excerpt: 'An empirical look at dual-sided albedo reflection gains versus premium module procurement costs in residential infrastructure setups.',
+    date: '2026-05-24',
+    readTime: '7 min read',
+    author: 'Grid Pulse AI Core',
+    imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=600&auto=format&fit=crop'
+  }
+];
 
 interface BlogHubProps {
   onSelectArticle: (id: string) => void;
-  onBack: () => void; // Added property receiver hook
+  onBack: () => void;
 }
 
 export default function BlogHub({ onSelectArticle, onBack }: BlogHubProps) {
-  const [visibleCount, setVisibleCount] = useState<number>(6);
-  const trendingArticles = articlesData.slice(0, visibleCount);
-
-  const handleShowMore = () => {
-    setVisibleCount(articlesData.length);
-  };
-
   return (
-    <div className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-12">
+    <div className="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-8">
       
-      {/* GLOWING RETURN ANCHOR LINK - FIXES THE COLD NAVIGATION BUG */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1 text-[11px] font-mono font-bold tracking-wider text-slate-400 hover:text-amber-400 transition-colors mb-6 group cursor-pointer"
-      >
-        <ChevronLeft className="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" />
-        RETURN TO FORECASTER COMMAND TERMINAL
-      </button>
-
-      {/* Premium Hub Header Hero Frame */}
-      <div className="relative glass-panel p-8 rounded-[28px] overflow-hidden mb-12 border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
-        <div className="max-w-3xl">
-          <span className="text-[9px] font-mono text-amber-400 uppercase tracking-[0.15em] font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 w-max mb-4">
-            <TrendingUp className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            TODAY'S TRENDING ENERGY ANALYTICS // 2026 MARKET
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-glass-title font-black text-slate-100 tracking-tight leading-none">
-            Grid Pulse Intelligence Hub
-          </h1>
-          <p className="text-xs sm:text-sm font-glass-body mt-3 text-slate-400 leading-relaxed">
+      {/* BLOG HEADER TITLE HUB BANNER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+        <div>
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-xs font-mono text-amber-400 hover:text-amber-300 mb-3 bg-transparent border-none cursor-pointer group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+            RETURN TO FORECASTER COMMAND TERMINAL
+          </button>
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl">
+              <BookOpen className="w-5 h-5 animate-pulse" />
+            </div>
+            <h1 className="text-[clamp(1.5rem,4vw,2rem)] font-glass-title font-bold text-slate-100">
+              Grid Pulse Intelligence Hub
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-400 font-glass-body mt-2 max-w-3xl">
             Deep technical investigations, commercial infrastructure load profiles, regional subsidy application tracking, and next-generation policy updates.
           </p>
         </div>
       </div>
 
-      {/* Grid Interface Mapping Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trendingArticles.map((article: Article) => (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={article.id}
-            onClick={() => onSelectArticle(article.id)}
-            className="glass-panel rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all duration-300 group cursor-pointer flex flex-col h-full overflow-hidden hover:shadow-[0_8px_25px_rgba(245,158,11,0.05)] bg-slate-950/45"
-          >
-            <div className="relative aspect-video w-full bg-slate-900 border-b border-white/5 overflow-hidden">
-              <img
-                src={article.image}
-                alt={article.title}
-                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 opacity-80 group-hover:opacity-100"
-                onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=600";
-                }}
-              />
-            </div>
-
-            <div className="p-6 flex flex-col flex-grow justify-between">
-              <div>
-                <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 mb-3 uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  {article.date}
-                </div>
-                
-                <h3 className="text-base font-bold text-slate-200 group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug mb-3">
-                  {article.title}
-                </h3>
-                
-                <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed mb-6 font-glass-body">
-                  {article.description}
-                </p>
-              </div>
-
-              <div className="flex items-center text-xs font-mono font-bold tracking-wider text-amber-400 gap-1 pt-4 border-t border-white/5">
-                READ METRIC EVALUATION
-                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" />
-              </div>
-            </div>
-          </motion.div>
+      {/* ARTICLES LAYOUT MATRIX */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(290px,1fr))] gap-6">
+        {SAMPLE_ARTICLES.map((article) => (
+          <BlogCard 
+            key={article.id} 
+            article={article} 
+            onSelect={onSelectArticle} 
+          />
         ))}
       </div>
+    </div>
+  );
+}
 
-      {/* SHOW MORE CONTROLLER ACTION TRIGGER */}
-      {visibleCount < articlesData.length && (
-        <div className="flex justify-center mt-12">
-          <motion.button
-            onClick={handleShowMore}
-            whileHover={{ scale: 1.03, backgroundColor: "rgba(245,158,11,0.1)" }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 px-8 py-4 bg-slate-950/80 border border-amber-500/30 hover:border-amber-400 text-amber-400 font-mono text-xs font-black tracking-widest uppercase rounded-2xl shadow-lg cursor-pointer transition-all duration-300"
-          >
-            SHOW MORE ARTICLES
-            <ChevronDown className="w-4 h-4 text-amber-400 animate-bounce" />
-          </motion.button>
+/* ============================================================================
+   ISOLATED CHILD COMPONENT: Prevents error bubbling across the virtual DOM matrix
+   ============================================================================ */
+function BlogCard({ article, onSelect }: { article: any; onSelect: (id: string) => void }) {
+  // Premium fallback illustration asset used if user paths run into offline or broken imagery
+  const PREMIUM_FALLBACK_URL = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=600&auto=format&fit=crop';
+  
+  const [imageSource, setImageSource] = useState<string>(article.imageUrl || PREMIUM_FALLBACK_URL);
+
+  return (
+    <div className="glass-panel rounded-2xl overflow-hidden border border-white/5 bg-slate-900/20 flex flex-col h-full hover:border-amber-500/20 transition-all duration-300 group shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      
+      {/* CARD COVERS VIEW CONTAINER */}
+      <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+        <img 
+          src={imageSource} 
+          alt={article.title}
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+          onError={() => {
+            // RECTIFIED: Catches 404/broken links instantly and maps back to premium baseline photo
+            setImageSource(PREMIUM_FALLBACK_URL);
+          }}
+        />
+        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md border border-white/10 px-2 py-0.5 rounded-md text-[10px] font-mono text-amber-400 font-semibold uppercase tracking-wider">
+          {article.readTime}
         </div>
-      )}
+      </div>
+
+      {/* CARD CONTENT LAYER */}
+      <div className="p-5 flex flex-col flex-grow justify-between gap-4">
+        <div className="space-y-2">
+          {/* Metadata Meta Layer */}
+          <div className="flex items-center gap-3 text-[10px] font-mono text-slate-500">
+            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {article.date}</span>
+            <span className="flex items-center gap-1"><User className="w-3 h-3" /> {article.author}</span>
+          </div>
+          
+          <h2 className="text-sm font-bold text-slate-100 font-glass-title group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug">
+            {article.title}
+          </h2>
+          <p className="text-xs text-slate-400 font-glass-body line-clamp-3 leading-relaxed">
+            {article.excerpt}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onSelect(article.id)}
+          className="w-full text-center py-2.5 rounded-xl border border-amber-500/20 hover:border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 text-xs font-mono font-bold tracking-wide uppercase transition-all duration-200 cursor-pointer"
+        >
+          Read Metric Evaluation &rarr;
+        </button>
+      </div>
     </div>
   );
 }
