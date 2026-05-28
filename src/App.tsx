@@ -277,11 +277,6 @@ export function App() {
   };
 
   /**
-   * Generates a fully qualified, localized Amazon monetization link based on selected dashboard parameters
-   * @param asin Unique Product Amazon Standard Identification Number
-   * @returns Localized URL string injection matching OneLink rules
-   */
- /**
    * Generates a fully qualified, localized Amazon affiliate link.
    * Smart-detects ASINs vs Search Queries to prevent 404 routing errors.
    * @param asinOrQuery Unique 10-char ASIN or a raw/encoded search text string
@@ -302,7 +297,7 @@ export function App() {
       // Direct Product Page Routing
       return `https://www.${domain}/dp/${cleanInput}?tag=${tag}`;
     } else {
-      // Search Results Marketplace Routing (Ensures queries don't 404)
+      // Search Results Marketplace Routing (Fixes the 404 issue with queries)
       return `https://www.${domain}/s?k=${asinOrQuery}&tag=${tag}`;
     }
   };
@@ -775,7 +770,7 @@ export function App() {
                 results={results} 
                 panelsNeeded={results.panelsNeeded} 
                 systemSizeKw={results.systemSizeKw} 
-                getRegionalAffiliateLink={getRegionalAmazonLink} // Injected for regional e-commerce compilation
+                getRegionalAffiliateLink={getRegionalAmazonLink}
               />
             </div>
           </motion.main>
