@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Clock, User, Share2, AlertCircle } from 'lucide-react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { ArrowLeft, Calendar, Clock, User, Share2, Tag } from 'lucide-react';
+import { ARTICLES } from './BlogHub';
 
 interface ArticleViewerProps {
   articleId: string;
@@ -8,124 +8,216 @@ interface ArticleViewerProps {
 }
 
 export default function ArticleViewer({ articleId, onBack }: ArticleViewerProps) {
-  const PREMIUM_FALLBACK_URL = 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=1200&auto=format&fit=crop';
-  
-  const [headerImage, setHeaderImage] = useState<string>(PREMIUM_FALLBACK_URL);
+  const FALLBACK = 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=1400&auto=format&fit=crop';
 
-  // Simple runtime hydration hook mimicking fetch retrieval from an asset dictionary matrix
-  // Replace or connect with your live real data storage configurations
-  const [articleData, setArticleData] = useState<any>(null);
+  const article = ARTICLES.find(a => a.id === articleId || a.slug === articleId);
+  const [imgSrc, setImgSrc] = useState(article?.image || FALLBACK);
 
-  useEffect(() => {
-    // Mimicking local content routing assembly mapping array matching loops
-    const mockArticlesDb: Record<string, any> = {
-      'pm-surya-ghar': {
-        title: 'How to Track Your PM Surya Ghar Application Status',
-        date: '2026-05-27',
-        readTime: '6 min read',
-        author: 'Grid Pulse Analytics',
-        imageUrl: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=1200&auto=format&fit=crop',
-        content: `The deployment of the national residential rooftop subsidy portal represents a structural transformation in distributed energy accessibility. However, navigating the intersection of local DISCOM validation loops, site inspection schedules, and field feasibility sign-offs introduces complex information delays for homeowners.`
-      },
-      'commercial-solar-roi': {
-        title: 'Commercial Solar ROI: Calculating True Payback Periods for Industrial Arrays',
-        date: '2026-05-25',
-        readTime: '9 min read',
-        author: 'E. R. Panchal',
-        imageUrl: 'broken-asset-path-simulation.jpg', // Triggers the safety filter
-        content: `Industrial capital expense deployments into utility-scale solar asset generation require granular depreciation evaluations. By mapping MACRS write-offs alongside avoided grid peak capacity tariffs, asset developers can calculate true risk-adjusted performance models.`
-      },
-      'bifacial-vs-monofacial': {
-        title: 'Bifacial vs. Monofacial Solar Panels: Which Yields Better ROI in 2026?',
-        date: '2026-05-24',
-        readTime: '7 min read',
-        author: 'Grid Pulse AI Core',
-        imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',
-        content: `Bifacial photovoltaic generation introduces ground-level reflection configurations known as albedo efficiency modifiers. While dual-glass modules scale capital procurement costs by up to 15%, tracking arrays positioned above high-reflection surfaces generate compound energy output expansions.`
-      }
-    };
-
-    const targetData = mockArticlesDb[articleId];
-    if (targetData) {
-      setArticleData(targetData);
-      setHeaderImage(targetData.imageUrl || PREMIUM_FALLBACK_URL);
+  const handleShare = () => {
+    const url = `${window.location.origin}/?view=blog&article=${article?.slug || articleId}`;
+    if (navigator.share) {
+      navigator.share({ title: article?.title, text: article?.excerpt, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!')).catch(() => {});
     }
-  }, [articleId]);
+  };
 
-  if (!articleData) {
+  if (!article) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <AlertCircle className="w-8 h-8 text-amber-500 mx-auto animate-spin" />
-        <p className="text-sm font-mono text-slate-400">Assembling Document Framework...</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 text-white">
+        <h2 className="text-xl font-bold text-amber-400">Article Not Found</h2>
+        <p className="text-sm text-slate-400 mt-2 max-w-sm">This article may have been moved or renamed.</p>
+        <button
+          onClick={onBack}
+          className="mt-6 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
+        >
+          Back to Solar Intelligence Hub
+        </button>
       </div>
     );
   }
 
+  // Render markdown-style bold (**text**) and paragraph breaks
+  const renderContent = (text: string) => {
+    return text.split('\n\n').map((para, i) => {
+      if (para.startsWith('**') && para.includes('**\n')) {
+        // Section heading
+        const heading = para.match(/\*\*(.+?)\*\*/)?.[1] || '';
+        const rest = para.replace(/\*\*(.+?)\*\*\n?/, '').trim();
+        return (
+          <div key={i} className="space-y-2">
+            <h2 className="text-base sm:text-lg font-bold text-amber-400 tracking-tight">{heading}</h2>
+            {rest && <p className="text-slate-300 leading-relaxed">{renderInlineBold(rest)}</p>}
+          </div>
+        );
+      }
+      if (para.startsWith('- ') || para.includes('\n- ')) {
+        // Bullet list
+        const lines = para.split('\n').filter(l => l.trim());
+        return (
+          <ul key={i} className="space-y-2 pl-4">
+            {lines.map((line, j) => (
+              <li key={j} className="text-slate-300 leading-relaxed flex gap-2">
+                <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                <span>{renderInlineBold(line.replace(/^-\s*/, ''))}</span>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      // Regular paragraph
+      return (
+        <p key={i} className="text-slate-300 leading-relaxed">
+          {renderInlineBold(para)}
+        </p>
+      );
+    });
+  };
+
+  const renderInlineBold = (text: string) => {
+    const parts = text.split(/\*\*(.+?)\*\*/g);
+    return parts.map((part, i) =>
+      i % 2 === 1
+        ? <strong key={i} className="text-slate-100 font-semibold">{part}</strong>
+        : <React.Fragment key={i}>{part}</React.Fragment>
+    );
+  };
+
+  // Related articles (same category, exclude current)
+  const related = ARTICLES.filter(a => a.category === article.category && a.id !== article.id).slice(0, 3);
+
   return (
-    <div className="relative z-10 flex-grow max-w-4xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-      
-      {/* TOP NAVIGATION BARS */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+    <article className="min-h-screen text-slate-100 pb-20 selection:bg-amber-500/30 selection:text-amber-200">
+
+      {/* ── TOP NAV ── */}
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-4 flex items-center justify-between border-b border-white/5">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-xs font-mono text-slate-400 hover:text-slate-200 bg-transparent border-none cursor-pointer group"
+          className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400 hover:text-amber-400 font-mono transition-colors group bg-transparent border-none cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          BACK TO INSIGHTS INDEX
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          Back to Hub
         </button>
-        <button 
-          onClick={() => navigator.clipboard.writeText(window.location.href)}
-          className="text-slate-500 hover:text-amber-400 p-2 bg-slate-900/60 border border-white/5 rounded-xl transition-colors cursor-pointer"
-          title="Copy Article link"
+        <button
+          onClick={handleShare}
+          className="p-2 rounded-xl border border-white/10 bg-slate-900/40 hover:bg-white/5 text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+          title="Share this article"
         >
           <Share2 className="w-4 h-4" />
         </button>
       </div>
 
-      {/* ARTICLE DATA HEADERS */}
-      <div className="space-y-3">
-        <h1 className="text-[clamp(1.5rem,5vw,2.5rem)] font-glass-title font-black text-slate-100 tracking-tight leading-tight">
-          {articleData.title}
-        </h1>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono text-slate-450 pt-1">
-          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-amber-500" /> {articleData.date}</span>
-          <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-amber-500" /> By {articleData.author}</span>
-          <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-500" /> {articleData.readTime}</span>
+      {/* ── ARTICLE HEADER ── */}
+      <header className="max-w-3xl mx-auto px-4 pt-10 text-center">
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
+          <span className="px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono font-bold uppercase tracking-widest">
+            {article.category}
+          </span>
+          {article.tags.slice(0, 3).map(tag => (
+            <span key={tag} className="px-2 py-0.5 rounded-md bg-slate-900 border border-white/5 text-slate-500 text-[9px] font-mono">
+              #{tag}
+            </span>
+          ))}
         </div>
-      </div>
 
-      {/* LARGE CINEMATIC HERO IMAGE BANNER COMPONENT */}
-      <div className="relative w-full h-[240px] sm:h-[420px] rounded-[24px] overflow-hidden bg-slate-950 shadow-[0_12px_40px_rgba(0,0,0,0.6)] border border-white/5">
-        <img 
-          src={headerImage} 
-          alt={articleData.title}
+        <h1 className="text-2xl md:text-[2rem] font-extrabold tracking-tight text-white leading-snug">
+          {article.title}
+        </h1>
+
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-4 text-[11px] font-mono text-slate-400">
+          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-amber-500" /> {article.date}</span>
+          <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-amber-500" /> {article.author}</span>
+          <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-500" /> {article.readTime}</span>
+        </div>
+      </header>
+
+      {/* ── HERO IMAGE ── */}
+      <div className="max-w-4xl mx-auto px-4 mt-8 rounded-[28px] overflow-hidden border border-white/5 shadow-2xl relative aspect-[21/9]">
+        <img
+          src={imgSrc}
+          alt={article.title}
           className="w-full h-full object-cover"
-          onError={() => {
-            // RECTIFIED: Swaps banner automatically if background link hosting experiences disruption
-            setHeaderImage(PREMIUM_FALLBACK_URL);
-          }}
+          onError={() => setImgSrc(FALLBACK)}
+          loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
       </div>
 
-      {/* ARTICLE EDITORIAL TEXT Real Estate CONTENT HOOK LAYERS */}
-      <article className="prose prose-invert prose-amber max-w-none text-slate-300 font-glass-body leading-relaxed text-sm sm:text-base space-y-6 pt-2">
-        <p className="first-letter:text-5xl first-letter:font-black first-letter:text-amber-400 first-letter:mr-3 first-letter:float-left first-letter:leading-none">
-          {articleData.content}
-        </p>
-        
-        {/* AdSense Unit In-Feed Placeholder */}
-        <div className="my-8 p-4 bg-slate-950/80 border border-dashed border-slate-800 rounded-xl text-center">
-          <span className="text-[9px] font-mono tracking-widest text-slate-600 block mb-1">GOOGLE ADSENSE ENGINE PLACEHOLDER UNIT [MID CONTENT BANNER]</span>
-          <div className="w-full h-20 bg-slate-900/40 rounded flex items-center justify-center text-slate-500 text-xs italic">
-            Contextual Native Advertisements Automatically Render Here
+      {/* ── ARTICLE BODY ── */}
+      <main className="max-w-2xl mx-auto px-4 mt-12 space-y-6 text-sm sm:text-base">
+        {/* Drop cap on first paragraph */}
+        <div className="first-of-type:first-letter:text-5xl first-of-type:first-letter:font-black first-of-type:first-letter:text-amber-400 first-of-type:first-letter:mr-3 first-of-type:first-letter:float-left first-of-type:first-letter:leading-none">
+          {renderContent(article.content)}
+        </div>
+
+        {/* ── CTA CARD ── */}
+        <div className="mt-12 p-6 rounded-2xl border border-white/5 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-amber-500/10 transition-all" />
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div>
+              <h3 className="text-amber-400 font-bold text-sm tracking-wide">
+                Calculate Your Solar Savings
+              </h3>
+              <p className="text-xs text-slate-400 mt-1.5 max-w-md leading-relaxed">
+                Use the free Grid Pulse AI forecaster to model your exact payback period, system size, and Amazon hardware recommendations — personalised to your country and electricity bill.
+              </p>
+            </div>
+            <button
+              onClick={onBack}
+              className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl tracking-widest uppercase transition-all whitespace-nowrap shadow-lg shadow-amber-500/15 border border-amber-400/20 cursor-pointer"
+            >
+              Open Forecaster →
+            </button>
           </div>
         </div>
+      </main>
 
-        <p>
-          As clean energy frameworks continue to mature globally, maintaining live computational accuracy over physical layout arrays ensures predictive security for individual long-term hardware investments.
-        </p>
-      </article>
-    </div>
+      {/* ── RELATED ARTICLES ── */}
+      {related.length > 0 && (
+        <section className="max-w-4xl mx-auto px-4 mt-16 pt-8 border-t border-white/5">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-1 h-4 bg-amber-500 rounded-full" />
+            <h2 className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">Related Articles</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {related.map(rel => {
+              const [rImgSrc, setRImgSrc] = useState(rel.image);
+              return (
+                <div
+                  key={rel.id}
+                  onClick={onBack}
+                  className="rounded-2xl overflow-hidden border border-white/5 bg-slate-900/30 cursor-pointer hover:border-amber-500/20 transition-all group"
+                >
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={rImgSrc}
+                      alt={rel.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={() => setRImgSrc(FALLBACK)}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <p className="text-[9px] font-mono text-amber-400/80 uppercase tracking-widest mb-1">{rel.category}</p>
+                    <h3 className="text-xs font-bold text-slate-200 line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">
+                      {rel.title}
+                    </h3>
+                    <p className="text-[10px] font-mono text-slate-500 mt-2">{rel.readTime}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── FOOTER ── */}
+      <footer className="max-w-2xl mx-auto px-4 mt-12 pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-600 tracking-wider">
+        <p>© 2026 Grid Pulse AI · Solar Intelligence</p>
+        <button onClick={onBack} className="hover:text-slate-400 transition-colors cursor-pointer bg-transparent border-none">
+          ← Intelligence Hub
+        </button>
+      </footer>
+    </article>
   );
 }
