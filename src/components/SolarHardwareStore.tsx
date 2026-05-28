@@ -18,7 +18,7 @@ interface SolarHardwareStoreProps {
   };
   panelsNeeded: number;
   systemSizeKw: number;
-  getRegionalAffiliateLink: (asinOrQuery: string) => string; // Bound to App.tsx dynamic router
+  getRegionalAffiliateLink: (asinOrQuery: string) => string;
 }
 
 export default function SolarHardwareStore({
@@ -36,7 +36,7 @@ export default function SolarHardwareStore({
       name: 'Tier-1 Monocrystalline High-Yield PV Panels',
       specs: `${panelsNeeded}x 400W Modules | Solid Tempered Glass`,
       description: 'Ultra-high efficiency multi-busbar panels optimized for extreme low-light photon absorption metrics.',
-      priceEstimate: results.netCost * 0.45, // Proportional estimation matrix
+      priceEstimate: results.netCost * 0.45,
       searchQuery: `${panelsNeeded} Monocrystalline Solar Panels 400W`
     },
     {
@@ -57,10 +57,8 @@ export default function SolarHardwareStore({
     }
   ];
 
-  // Global complete kit search parameters configuration fallback
   const fallbackCompleteKitQuery = `Complete DIY Solar Panel Kit ${Math.ceil(systemSizeKw)}kW`;
 
-  // Helper formatting calculation
   const formatLocalPrice = (val: number) => {
     return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
       style: 'currency',
@@ -93,7 +91,7 @@ export default function SolarHardwareStore({
       {/* HARDWARE SPECIFICATION GRID LAYOUT MATRIX */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
         {hardwareItems.map((item) => {
-          // Compute a dynamic target string for each localized e-commerce element
+          // Generates the absolute, target URL safely handled via standard URI component encoders
           const itemAffiliateUrl = getRegionalAffiliateLink(encodeURIComponent(item.searchQuery));
 
           return (
