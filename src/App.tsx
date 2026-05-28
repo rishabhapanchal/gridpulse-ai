@@ -751,7 +751,7 @@ export function App() {
                       activeTab === 'financial' ? 'bg-slate-900 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Paperclip className="w-4 h-4 text-amber-400" />
+                    <Scale className="w-4 h-4 text-amber-400" />
                     Financials
                   </button>
                   <button
@@ -821,7 +821,6 @@ export function App() {
           <motion.div key="article-viewer-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <ArticleViewer 
               currentSlug={selectedArticleId} 
-              articles={ARTICLES} 
               onBack={handleNavigateToBlog} 
               onNavigateToArticle={handleNavigateToArticle} 
             />
