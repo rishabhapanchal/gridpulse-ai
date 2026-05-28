@@ -62,10 +62,57 @@ const AMAZON_ASSOCIATE_TAGS: Record<string, string> = {
 };
 // ----------------------------------------------------------------
 
+// ----------------------------------------------------------------
+// SUPPORTED COUNTRY CODES IN countryConfig.ts
+// ----------------------------------------------------------------
+const SUPPORTED_COUNTRY_CODES = new Set(COUNTRIES.map((c) => c.code));
+// ----------------------------------------------------------------
+
 export function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [, startTransition] = useTransition();
+
+  // ----------------------------------------------------------------
+  // GEO AUTO-DETECTION: Detect user country via IP on first load.
+  // Uses ipapi.co (free, no key required). Result is cached in
+  // sessionStorage so it only fires once per browser session.
+  // Falls back silently to 'US' if detection fails or country is
+  // not in the supported list.
+  // ----------------------------------------------------------------
+  useEffect(() => {
+    const cached = sessionStorage.getItem('gp_detected_country');
+    if (cached) {
+      if (SUPPORTED_COUNTRY_CODES.has(cached)) {
+        setSelectedCountryCode(cached);
+      }
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+    fetch('https://ipapi.co/json/', { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        clearTimeout(timeoutId);
+        const code: string = (data?.country_code ?? '').toUpperCase();
+        sessionStorage.setItem('gp_detected_country', code);
+        if (SUPPORTED_COUNTRY_CODES.has(code)) {
+          setSelectedCountryCode(code);
+        }
+      })
+      .catch(() => {
+        clearTimeout(timeoutId);
+        // Silent fallback — stays on default 'US'
+      });
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, []);
+  // ----------------------------------------------------------------
 
   const country = COUNTRIES.find((c) => c.code === selectedCountryCode) || COUNTRIES[0];
   const currency = country.currency;
@@ -233,6 +280,9 @@ export function App() {
     const oldCountry = country;
     setSelectedCountryCode(newCode);
     setIsCountryDropdownOpen(false);
+
+    // Also update sessionStorage so manual override persists for the session
+    sessionStorage.setItem('gp_detected_country', newCode);
 
     const ratio = newCountry.conversionRateFromUSD / oldCountry.conversionRateFromUSD;
 
