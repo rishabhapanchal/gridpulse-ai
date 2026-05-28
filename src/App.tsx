@@ -38,6 +38,30 @@ import ArticleViewer from './components/ArticleViewer';
 // COMPLIANCE AND PROTECTION INTERFACE LAYER MODALS
 import LegalModal from './components/LegalModal';
 
+// ----------------------------------------------------------------
+// AMAZON AFFILIATE & ONELINK CONFIGURATION MATRIX
+// ----------------------------------------------------------------
+const AMAZON_MARKETPLACE_DOMAINS: Record<string, string> = {
+  IN: 'amazon.in',
+  US: 'amazon.com',
+  GB: 'amazon.co.uk',
+  CA: 'amazon.ca',
+  DE: 'amazon.de',
+  ES: 'amazon.es',
+  DEFAULT: 'amazon.com'
+};
+
+const AMAZON_ASSOCIATE_TAGS: Record<string, string> = {
+  IN: 'gridpulseai-21',    // Direct Indian Marketplace Associate ID
+  US: 'gridpulseglob-20',  // Global/US Root Associate ID
+  GB: 'gridpulseglob-20',  // OneLink Routed to Global ID
+  CA: 'gridpulseglob-20',  // OneLink Routed to Global ID
+  DE: 'gridpulseglob-20',  // OneLink Routed to Global ID
+  ES: 'gridpulseglob-20',  // OneLink Routed to Global ID
+  DEFAULT: 'gridpulseglob-20'
+};
+// ----------------------------------------------------------------
+
 export function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>('US');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -71,7 +95,6 @@ export function App() {
   // NAVIGATION FIXED CORE ENGINE: Sync View Changes with Browser History
   // ----------------------------------------------------------------
   useEffect(() => {
-    // Intercept hardware and software browser navigation actions
     const handlePopState = (event: PopStateEvent) => {
       if (event.state && event.state.view) {
         setCurrentView(event.state.view);
@@ -79,12 +102,10 @@ export function App() {
           setSelectedArticleId(event.state.articleId);
         }
       } else {
-        // Default fallback back to landing layout
         setCurrentView('landing');
       }
     };
 
-    // Initialize root landing history baseline so the browser knows where it started
     if (!window.history.state) {
       window.history.replaceState({ view: 'landing' }, '');
     }
@@ -93,7 +114,6 @@ export function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // INTERACTIVE NAVIGATION HANDLERS WITH HISTORY PUSH OVERRIDES
   const handleNavigateToBlog = () => {
     window.history.pushState({ view: 'blog' }, '');
     setCurrentView('blog');
@@ -121,7 +141,7 @@ export function App() {
     details?: string;
   }>({ status: 'checking' });
 
-  React.useEffect(() => {
+  useEffect(() => {
     let isMounted = true;
     fetch('/api/healthz')
       .then((res) => {
@@ -254,6 +274,18 @@ export function App() {
         });
       }
     });
+  };
+
+  /**
+   * Generates a fully qualified, localized Amazon monetization link based on selected dashboard parameters
+   * @param asin Unique Product Amazon Standard Identification Number
+   * @returns Localized URL string injection matching OneLink rules
+   */
+  const getRegionalAmazonLink = (asin: string): string => {
+    const targetCode = selectedCountryCode.toUpperCase();
+    const domain = AMAZON_MARKETPLACE_DOMAINS[targetCode] || AMAZON_MARKETPLACE_DOMAINS.DEFAULT;
+    const tag = AMAZON_ASSOCIATE_TAGS[targetCode] || AMAZON_ASSOCIATE_TAGS.DEFAULT;
+    return `https://www.${domain}/dp/${asin}?tag=${tag}`;
   };
 
   const minBill = country.minBill;
@@ -618,16 +650,21 @@ export function App() {
                   </div>
                 </div>
 
-                <BillAnalyzer onDataExtracted={handleBillExtracted} currency={currency} currencySymbol={currencySymbol} />
-                <SolarVisualizer
-                  panelsNeeded={results.panelsNeeded}
-                  systemSizeKw={results.systemSizeKw}
-                  sunHours={state.sunHours}
-                  onSunHoursChange={handleSunHoursChange}
-                  equivalentTrees={results.equivalentTrees}
-                  carbonReducedTons={results.carbonReducedTons}
-                  roofOrientation={state.roofOrientation}
-                />
+                <div className="w-full">
+                  <BillAnalyzer onDataExtracted={handleBillExtracted} currency={currency} currencySymbol={currencySymbol} />
+                </div>
+                
+                <div className="w-full">
+                  <SolarVisualizer
+                    panelsNeeded={results.panelsNeeded}
+                    systemSizeKw={results.systemSizeKw}
+                    sunHours={state.sunHours}
+                    onSunHoursChange={handleSunHoursChange}
+                    equivalentTrees={results.equivalentTrees}
+                    carbonReducedTons={results.carbonReducedTons}
+                    roofOrientation={state.roofOrientation}
+                  />
+                </div>
               </section>
 
               {/* RIGHT OUTPUT PANEL */}
@@ -706,12 +743,21 @@ export function App() {
                   )}
                 </div>
 
-                <SavingsChart results={results} monthlyBill={state.monthlyBill} currency={currency} currencySymbol={currencySymbol} />
+                <div className="w-full">
+                  <SavingsChart results={results} monthlyBill={state.monthlyBill} currency={currency} currencySymbol={currencySymbol} />
+                </div>
               </section>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 pb-4 relative z-20">
-              <SolarHardwareStore country={country} results={results} panelsNeeded={results.panelsNeeded} systemSizeKw={results.systemSizeKw} />
+            {/* SOLAR HARDWARE ASSORTMENT REAL ESTATE LAYOUT */}
+            <div className="max-w-7xl mx-auto px-0 pb-4 relative z-20 w-full">
+              <SolarHardwareStore 
+                country={country} 
+                results={results} 
+                panelsNeeded={results.panelsNeeded} 
+                systemSizeKw={results.systemSizeKw} 
+                getRegionalAffiliateLink={getRegionalAmazonLink} // Injected for regional e-commerce compilation
+              />
             </div>
           </motion.main>
         )}
