@@ -1,6 +1,17 @@
 import React, { useMemo } from 'react';
 import { ArrowLeft, Clock, Calendar, Tag, BookOpen } from 'lucide-react';
-import { Article } from '../data/articles'; // Clean unified import
+
+export interface Article {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  date: string;
+  content: string;
+  image?: string;
+  readTime?: string;
+  tags?: string[];
+}
 
 interface ArticleViewerProps {
   currentSlug: string;
