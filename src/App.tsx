@@ -75,14 +75,35 @@ export function App() {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [, startTransition] = useTransition();
 
+  // USER INTERFACE ROUTING VIEW STATE CONTROLLER
+  const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
+  const [selectedArticleId, setSelectedArticleId] = useState<string>('');
+
+  const [state, setState] = useState<CalculatorState>({
+    monthlyBill: 150, // Temporary fallback baseline before geo-detection hooks complete
+    sunHours: 4.5,
+    utilityRate: 0.18,
+    roofOrientation: 'south',
+    panelCapacity: 400,
+  });
+
   // ----------------------------------------------------------------
-  // GEO AUTO-DETECTION: Detect user country via IP on first load.
+  // GEO AUTO-DETECTION: Detect user country via IP and synchronize state
   // ----------------------------------------------------------------
   useEffect(() => {
     const cached = sessionStorage.getItem('gp_detected_country');
     if (cached) {
       if (SUPPORTED_COUNTRY_CODES.has(cached)) {
         setSelectedCountryCode(cached);
+        const cachedCountry = COUNTRIES.find((c) => c.code === cached);
+        if (cachedCountry) {
+          setState((prev) => ({
+            ...prev,
+            monthlyBill: cachedCountry.defaultMonthlyBill,
+            utilityRate: cachedCountry.defaultUtilityRate,
+            sunHours: cachedCountry.defaultSunHours,
+          }));
+        }
       }
       return;
     }
@@ -98,11 +119,30 @@ export function App() {
         sessionStorage.setItem('gp_detected_country', code);
         if (SUPPORTED_COUNTRY_CODES.has(code)) {
           setSelectedCountryCode(code);
+          
+          const detectedCountry = COUNTRIES.find((c) => c.code === code);
+          if (detectedCountry) {
+            setState((prev) => ({
+              ...prev,
+              monthlyBill: detectedCountry.defaultMonthlyBill,
+              utilityRate: detectedCountry.defaultUtilityRate,
+              sunHours: detectedCountry.defaultSunHours,
+            }));
+          }
         }
       })
       .catch(() => {
         clearTimeout(timeoutId);
-        // Silent fallback — stays on default 'US'
+        // Silent fallback loop — defaults back to initial USD configurations
+        const defaultUS = COUNTRIES.find((c) => c.code === 'US');
+        if (defaultUS) {
+          setState((prev) => ({
+            ...prev,
+            monthlyBill: defaultUS.defaultMonthlyBill,
+            utilityRate: defaultUS.defaultUtilityRate,
+            sunHours: defaultUS.defaultSunHours,
+          }));
+        }
       });
 
     return () => {
@@ -131,13 +171,9 @@ export function App() {
   const formatRate = (val: number) => {
     return `${country.symbol}${val.toFixed(2)}`;
   };
-
-  // USER INTERFACE ROUTING VIEW STATE CONTROLLER
-  const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
-  const [selectedArticleId, setSelectedArticleId] = useState<string>('');
   
   // ----------------------------------------------------------------
-  // NAVIGATION FIXED CORE ENGINE: Sync View Changes with Browser History
+  // NAVIGATION ROUTING CORE ENGINE: Browser State Management
   // ----------------------------------------------------------------
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
@@ -198,38 +234,29 @@ export function App() {
         if (data.status === 'ok' && data.hasGeminiKey) {
           setApiStatus({ 
             status: 'active', 
-            details: `Secure Connection to Gemini Core is Active. Key prefix: ${data.geminiKeyPrefix}, length: ${data.geminiKeyLength}` 
+            details: `Secure Connection to Gemini Core is Active.` 
           });
         } else if (data.status === 'ok' && !data.hasGeminiKey) {
           setApiStatus({ 
             status: 'missing_key', 
-            details: 'The GEMINI_API_KEY environment variable is not defined or is a blank placeholder.' 
+            details: 'The GEMINI_API_KEY environment variable is not defined.' 
           });
         } else {
           setApiStatus({ 
             status: 'fallback_mode', 
-            details: `Static fallback: ${JSON.stringify(data)}` 
+            details: `Static fallback active.` 
           });
         }
       })
       .catch((err) => {
         if (!isMounted) return;
-        console.error('API Diagnostics Error:', err);
         setApiStatus({ 
           status: 'fallback_mode', 
-          details: `Backend unreachable: ${err.message || 'Verification failed'}` 
+          details: `Backend unreachable: ${err.message}` 
         });
       });
     return () => { isMounted = false; };
   }, []);
-
-  const [state, setState] = useState<CalculatorState>({
-    monthlyBill: country.defaultMonthlyBill || 150,
-    sunHours: country.defaultSunHours || 4.5,
-    utilityRate: country.defaultUtilityRate || 0.18,
-    roofOrientation: 'south',
-    panelCapacity: 400,
-  });
 
   const [activeTab, setActiveTab] = useState<'financial' | 'environmental'>('financial');
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
