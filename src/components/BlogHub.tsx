@@ -45,7 +45,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
       
       <header className="max-w-6xl mx-auto text-center mb-16 relative">
         <div className="absolute inset-x-0 -top-12 h-40 bg-gradient-to-b from-amber-500/10 to-transparent blur-3xl opacity-50 pointer-events-none" />
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono mb-4 tracking-wider uppercase">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-550/20 text-amber-400 text-xs font-mono mb-4 tracking-wider uppercase">
           <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Command Intelligence Terminal
         </div>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-100 mb-4 leading-none">
