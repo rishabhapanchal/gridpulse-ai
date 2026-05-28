@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { BookOpen, ArrowRight, Grid, Filter, Sparkles, ChevronDown } from 'lucide-react';
-import { ARTICLES, Article } from '../data/articles';
+import { BookOpen, ArrowRight, Filter, Sparkles, ChevronDown } from 'lucide-react';
+import { ARTICLES } from '../data/articles';
 
 interface BlogHubProps {
   onSelectArticle: (slug: string) => void;
@@ -10,7 +10,6 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(`All`);
   const [visibleCount, setVisibleCount] = useState<number>(6);
 
-  // Extract unique categories and compute current active counts dynamically
   const categoriesWithCounts = useMemo(() => {
     const counts: Record<string, number> = { All: ARTICLES.length };
     ARTICLES.forEach((article) => {
@@ -19,15 +18,13 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
     return Object.entries(counts).map(([name, count]) => ({ name, count }));
   }, []);
 
-  // Split out the first 2 items to act as dominant Hero Features
   const featuredArticles = useMemo(() => {
     return ARTICLES.slice(0, 2);
   }, []);
 
-  // Filter out remaining grid entries depending on active category selections
   const filteredArticles = useMemo(() => {
     if (selectedCategory === `All`) {
-      return ARTICLES.slice(2); // Exclude features from lower grid lists
+      return ARTICLES.slice(2);
     }
     return ARTICLES.filter((article) => article.category === selectedCategory);
   }, [selectedCategory]);
@@ -40,13 +37,12 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    setVisibleCount(6); // Reset pagination limits on matrix changes
+    setVisibleCount(6);
   };
 
   return (
     <div className="min-h-screen bg-[#070709] text-slate-100 antialiased font-sans px-4 sm:px-6 lg:px-8 py-12 selection:bg-amber-500/20 selection:text-amber-400">
       
-      {/* BRAND HEADER */}
       <header className="max-w-6xl mx-auto text-center mb-16 relative">
         <div className="absolute inset-x-0 -top-12 h-40 bg-gradient-to-b from-amber-500/10 to-transparent blur-3xl opacity-50 pointer-events-none" />
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono mb-4 tracking-wider uppercase">
@@ -60,7 +56,6 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
         </p>
       </header>
 
-      {/* HERO SECTION (Only shows on 'All' category) */}
       {selectedCategory === `All` && (
         <section className="max-w-6xl mx-auto mb-16">
           <div className="flex items-center gap-2 mb-6 border-b border-neutral-900 pb-3">
@@ -106,7 +101,6 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
         </section>
       )}
 
-      {/* FILTER PANEL */}
       <nav className="max-w-6xl mx-auto mb-10 flex flex-wrap items-center justify-start gap-2 border-b border-neutral-900/60 pb-6">
         <div className="text-slate-500 flex items-center gap-1.5 mr-2 text-xs font-mono uppercase tracking-wider">
           <Filter className="w-3.5 h-3.5" /> Filters:
@@ -129,7 +123,6 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
         ))}
       </nav>
 
-      {/* ARTICLES MAIN LIST FEED */}
       <main className="max-w-6xl mx-auto">
         {displayedGridArticles.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-neutral-900 rounded-2xl bg-neutral-950/20">
@@ -168,7 +161,6 @@ export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
           </div>
         )}
 
-        {/* INCREMENTAL SHOW MORE BUTTON */}
         {hasMore && (
           <div className="flex justify-center mt-12 border-t border-neutral-900/40 pt-8">
             <button
