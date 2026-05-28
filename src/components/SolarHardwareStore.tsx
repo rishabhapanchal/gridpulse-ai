@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, ExternalLink, ShieldCheck, Truck, Package, HelpCircle } from 'lucide-react';
+import { ShoppingCart, ExternalLink, ShieldCheck, Truck, Package } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface CountryConfig {
@@ -18,7 +18,7 @@ interface SolarHardwareStoreProps {
   };
   panelsNeeded: number;
   systemSizeKw: number;
-  localizedAmazonUrl?: string; // Derived from App.tsx region state
+  getRegionalAffiliateLink: (asinOrQuery: string) => string; // Bound to App.tsx dynamic router
 }
 
 export default function SolarHardwareStore({
@@ -26,12 +26,9 @@ export default function SolarHardwareStore({
   results,
   panelsNeeded,
   systemSizeKw,
-  localizedAmazonUrl,
+  getRegionalAffiliateLink,
 }: SolarHardwareStoreProps) {
   
-  // Clean fallback if the link isn't fully generated upstream
-  const amazonSearchLink = localizedAmazonUrl || `https://www.amazon.com/s?k=Monocrystalline+Solar+Panels+400W`;
-
   // Dynamic hardware hardware specifications dictionary matrix matching system calculations
   const hardwareItems = [
     {
@@ -60,6 +57,9 @@ export default function SolarHardwareStore({
     }
   ];
 
+  // Global complete kit search parameters configuration fallback
+  const fallbackCompleteKitQuery = `Complete DIY Solar Panel Kit ${Math.ceil(systemSizeKw)}kW`;
+
   // Helper formatting calculation
   const formatLocalPrice = (val: number) => {
     return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
@@ -70,7 +70,7 @@ export default function SolarHardwareStore({
   };
 
   return (
-    <div className="relative glass-panel rounded-[28px] p-5 sm:p-7 border border-white/5 bg-slate-900/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden">
+    <div className="relative glass-panel rounded-[28px] p-5 sm:p-7 border border-white/5 bg-slate-900/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden w-full">
       <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
       
       {/* HUB HEADERS */}
@@ -92,46 +92,51 @@ export default function SolarHardwareStore({
 
       {/* HARDWARE SPECIFICATION GRID LAYOUT MATRIX */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-        {hardwareItems.map((item) => (
-          <div 
-            key={item.id} 
-            className="bg-slate-950/60 border border-slate-850 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:border-slate-700 group relative"
-          >
-            <div className="space-y-2">
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800 uppercase tracking-wide truncate max-w-[180px]">
-                  {item.specs}
-                </span>
-                <Package className="w-4 h-4 text-slate-600 group-hover:text-amber-500 transition-colors shrink-0" />
-              </div>
-              <h3 className="text-xs font-bold text-slate-200 group-hover:text-slate-100 transition-colors leading-snug">
-                {item.name}
-              </h3>
-              <p className="text-[11px] text-slate-450 leading-relaxed font-sans line-clamp-3">
-                {item.description}
-              </p>
-            </div>
+        {hardwareItems.map((item) => {
+          // Compute a dynamic target string for each localized e-commerce element
+          const itemAffiliateUrl = getRegionalAffiliateLink(encodeURIComponent(item.searchQuery));
 
-            <div className="pt-4 mt-4 border-t border-slate-900 flex items-center justify-between gap-2">
-              <div>
-                <div className="text-[9px] font-mono text-slate-500 uppercase">Est. Local Price</div>
-                <div className="text-sm font-mono font-bold text-amber-400 mt-0.5">
-                  {formatLocalPrice(item.priceEstimate)}
+          return (
+            <div 
+              key={item.id} 
+              className="bg-slate-950/60 border border-slate-850 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:border-slate-700 group relative text-left"
+            >
+              <div className="space-y-2">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800 uppercase tracking-wide truncate max-w-[180px]">
+                    {item.specs}
+                  </span>
+                  <Package className="w-4 h-4 text-slate-600 group-hover:text-amber-500 transition-colors shrink-0" />
                 </div>
+                <h3 className="text-xs font-bold text-slate-200 group-hover:text-slate-100 transition-colors leading-snug">
+                  {item.name}
+                </h3>
+                <p className="text-[11px] text-slate-400 leading-relaxed font-sans line-clamp-3">
+                  {item.description}
+                </p>
               </div>
-              
-              <a
-                href={amazonSearchLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/30 hover:bg-amber-500/5 text-slate-400 hover:text-amber-400 transition-all duration-200 cursor-pointer shadow-inner"
-                title={`Search exact item on Amazon ${country.code}`}
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+
+              <div className="pt-4 mt-4 border-t border-slate-900 flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[9px] font-mono text-slate-500 uppercase">Est. Local Price</div>
+                  <div className="text-sm font-mono font-bold text-amber-400 mt-0.5">
+                    {formatLocalPrice(item.priceEstimate)}
+                  </div>
+                </div>
+                
+                <a
+                  href={itemAffiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/30 hover:bg-amber-500/5 text-slate-400 hover:text-amber-400 transition-all duration-200 cursor-pointer shadow-inner"
+                  title={`Search exact item on Amazon ${country.code}`}
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* DISCLOSURE FOOTER BANNER ACTIONS */}
@@ -144,7 +149,7 @@ export default function SolarHardwareStore({
         </div>
 
         <motion.a
-          href={amazonSearchLink}
+          href={getRegionalAffiliateLink(encodeURIComponent(fallbackCompleteKitQuery))}
           target="_blank"
           rel="noopener noreferrer"
           whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(245,158,11,0.25)' }}
