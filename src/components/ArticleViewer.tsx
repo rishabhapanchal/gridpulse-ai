@@ -1,41 +1,28 @@
 import React, { useMemo } from 'react';
-import { ArrowLeft, Clock, Calendar, Tag, BookOpen } from 'lucide-react';
-
-export interface Article {
-  slug: string;
-  title: string;
-  excerpt: string;
-  category: string;
-  date: string;
-  content: string;
-  image?: string;
-  readTime?: string;
-  tags?: string[];
-}
+import { ArrowLeft, Clock, Calendar, BookOpen } from 'lucide-react';
+import { ARTICLES, Article } from '../data/articles';
 
 interface ArticleViewerProps {
   currentSlug: string;
-  articles: Article[];
   onBack: () => void;
   onNavigateToArticle: (slug: string) => void;
 }
 
 export const ArticleViewer: React.FC<ArticleViewerProps> = ({
   currentSlug,
-  articles,
   onBack,
   onNavigateToArticle,
 }) => {
   const article = useMemo(() => {
-    return articles.find((a) => a.slug === currentSlug);
-  }, [currentSlug, articles]);
+    return ARTICLES.find((a) => a.slug === currentSlug);
+  }, [currentSlug]);
 
   const relatedArticles = useMemo(() => {
     if (!article) return [];
-    return articles
+    return ARTICLES
       .filter((a) => a.category === article.category && a.slug !== article.slug)
       .slice(0, 3);
-  }, [article, articles]);
+  }, [article]);
 
   if (!article) {
     return (
