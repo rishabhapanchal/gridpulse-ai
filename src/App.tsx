@@ -281,11 +281,30 @@ export function App() {
    * @param asin Unique Product Amazon Standard Identification Number
    * @returns Localized URL string injection matching OneLink rules
    */
-  const getRegionalAmazonLink = (asin: string): string => {
+ /**
+   * Generates a fully qualified, localized Amazon affiliate link.
+   * Smart-detects ASINs vs Search Queries to prevent 404 routing errors.
+   * @param asinOrQuery Unique 10-char ASIN or a raw/encoded search text string
+   * @returns Formatted URL string matching OneLink and marketplace standards
+   */
+  const getRegionalAmazonLink = (asinOrQuery: string): string => {
     const targetCode = selectedCountryCode.toUpperCase();
     const domain = AMAZON_MARKETPLACE_DOMAINS[targetCode] || AMAZON_MARKETPLACE_DOMAINS.DEFAULT;
     const tag = AMAZON_ASSOCIATE_TAGS[targetCode] || AMAZON_ASSOCIATE_TAGS.DEFAULT;
-    return `https://www.${domain}/dp/${asin}?tag=${tag}`;
+    
+    // Clean up the parameter to check its format
+    const cleanInput = decodeURIComponent(asinOrQuery).trim();
+    
+    // Amazon ASINs are alphanumeric and exactly 10 characters long
+    const isAsin = /^[A-Z0-9]{10}$/i.test(cleanInput);
+
+    if (isAsin) {
+      // Direct Product Page Routing
+      return `https://www.${domain}/dp/${cleanInput}?tag=${tag}`;
+    } else {
+      // Search Results Marketplace Routing (Ensures queries don't 404)
+      return `https://www.${domain}/s?k=${asinOrQuery}&tag=${tag}`;
+    }
   };
 
   const minBill = country.minBill;
