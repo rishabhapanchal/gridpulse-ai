@@ -1,220 +1,92 @@
-import React from 'react';
-import { Article, articlesData } from '../data/articles';
-
-interface ArticleViewerProps {
-  currentArticleId: string;
-  onBackToHub: () => void;
-  onNavigateToCalculator: () => void;
+export interface Article {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  date: string;
+  content: string;
+  image?: string;
+  readTime?: string;
+  tags?: string[];
 }
 
-const ArticleViewer: React.FC<ArticleViewerProps> = ({ 
-  currentArticleId, 
-  onBackToHub,
-  onNavigateToCalculator
-}) => {
-  // Find the active article from your database matching the active selection state
-  const article = articlesData.find(item => item.id === currentArticleId || item.slug === currentArticleId);
+export const ARTICLES: Article[] = [
+  {
+    slug: `solar-payback-2026`,
+    title: `Solar Panel Payback Period in 2026: Country-by-Country Breakdown`,
+    excerpt: `From Germany's feed-in premiums to India's PM Surya Ghar subsidies and US federal ITC — we map real payback timelines for homeowners in 12 countries using live electricity tariff data.`,
+    category: `Finance`,
+    date: `May 28, 2026`,
+    readTime: `8 min read`,
+    image: `https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=80`,
+    tags: [`solar-payback`, `solar-finance`, `global-tariffs`],
+    content: `## The Shifting Economics of Global Solar
+The financial equation for residential solar has dramatically evolved heading into 2026. As global electricity tariffs climb alongside evolving national net-metering laws, calculating your precise break-even metric requires local data modeling.
 
-  // Fallback safety layer in case an incorrect slug or id routing parameter is passed
-  if (!article) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 bg-slate-950 text-white">
-        <h2 className="text-xl font-bold text-amber-400">Article Missing Matrix Node</h2>
-        <p className="text-sm text-slate-400 mt-2 max-w-sm">
-          The structural content asset you are looking for has been re-indexed or shifted.
-        </p>
-        <button 
-          onClick={onBackToHub}
-          className="mt-6 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs uppercase tracking-wider transition-all"
-        >
-          Return to Intelligence Hub
-        </button>
-      </div>
-    );
+### Global Market Performance Matrix
+* **Germany:** Driven by high retail power costs and structural feed-in premiums, typical 6kW configurations hit a complete investment recovery cycle within **5.2 to 6.5 years**.
+* **India:** Thanks to aggressive central financial support structures like the updated PM Surya Ghar scheme, residential rooftop arrays achieve sub-parity amortization in just **3.8 to 4.5 years**.
+* **United States:** Accounting for the extended 30% Federal Residential Clean Energy Credit (ITC), payback windows average **6.8 to 8.2 years**, depending highly on state-level utility frameworks.
+
+### Core Calculation Vectors
+To determine your localized payback matrix, Grid Pulse AI dynamically cross-references your current monthly utility base load against regional direct solar irradiance parameters.`
+  },
+  {
+    slug: `pm-surya-ghar-2026`,
+    title: `Step-by-Step Guide: How to Track Your PM Surya Ghar Application Status`,
+    excerpt: `Learn how to navigate the national solar portal, interpret internal DISCOM engineering review logs, and avoid regional net-metering processing bottlenecks.`,
+    category: `Policy`,
+    date: `May 27, 2026`,
+    readTime: `6 min read`,
+    image: `https://images.unsplash.com/photo-1613665813446-82a78c468a1d?auto=format&fit=crop&w=1200&q=80`,
+    tags: [`pm-surya-ghar`, `subsidy-tracking`, `india-solar`],
+    content: `## Navigating the National Rooftop Solar Pipeline
+Securing your structural rooftop subsidy under the PM Surya Ghar Muft Bijli Yojana requires navigating strict multi-stage regulatory validation checkpoints.
+
+### Breaking Down the Verification Milestones
+1. **Feasibility Approval:** Your regional DISCOM reviews your local distribution transformer capacity to ensure your structural grid connection won't trigger hardware instability.
+2. **Installation & Geotagging:** Once hardware deployment finishes, your certified vendor must execute an automated upload containing complete, geotagged infrastructure photo logs.
+3. **Net-Meter Inspection:** DISCOM field engineers deploy a bidirectional operational meter to monitor live inbound and outbound electrical currents.
+
+### Common Processing Bottlenecks
+If your status log shows a trailing delay during the 'Technical Feasibility' pass, it typically indicates a local utility distribution balancing deficit. You can review live, automated capacity logs directly inside your dashboard configuration matrix.`
+  },
+  {
+    slug: `commercial-solar-roi-2026`,
+    title: `Commercial Solar ROI: Calculating True Payback Periods for Industrial Arrays`,
+    excerpt: `A financial modeling deep-dive into accelerated depreciation curves, power purchase agreements, and grid-parity calculations.`,
+    category: `Finance`,
+    date: `May 25, 2026`,
+    readTime: `9 min read`,
+    image: `https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80`,
+    tags: [`commercial-roi`, `industrial-solar`, `financial-modeling`],
+    content: `## High-Ticket Corporate Amortization Layouts
+Commercial and industrial (C&I) solar assets present completely distinct structural vectors compared to traditional residential setups. Capital expenditure calculations must factor in macro business asset tax metrics.
+
+### Key Depreciation Optimization Strategies
+* **Accelerated Depreciation Adjustments:** Utilizing regional business asset provisions allows corporations to write off substantial portions of core solar hardware values within the first operational annual cycle.
+* **Power Purchase Agreements (PPAs):** Eliminates upfront structural acquisition costs, converting solar capital expenditure straight into operating cash flow structures.
+
+### Tracking Grid-Parity Thresholds
+When an industrial facility drops its operational costs below traditional high-voltage utility tariff inputs, the remaining generation arrays pass straight into absolute net profit margins.`
+  },
+  {
+    slug: `bifacial-vs-monofacial-2026`,
+    title: `Bifacial vs. Monofacial Solar Panels: Which Yields Better ROI in 2026?`,
+    excerpt: `An empirical look at dual-sided albedo reflection gains versus premium module procurement costs in residential infrastructure setups.`,
+    category: `Technology`,
+    date: `May 24, 2026`,
+    readTime: `7 min read`,
+    image: `https://images.unsplash.com/photo-1542332213-9b5a5a3faa35?auto=format&fit=crop&w=1200&q=80`,
+    tags: [`bifacial-panels`, `hardware-comparison`, `solar-efficiency`],
+    content: `## Exploding the Dual-Sided Panel Variable
+Bifacial solar technology captures ambient solar radiance from both the front surface and ground-reflection bounce layers (albedo) on the rear side of the active array.
+
+### Analyzing the Albedo Vector
+* **White Concrete Foundations:** Delivers up to a **25% efficiency generation increase** due to pure reflective material density.
+* **Standard Rooftop Surfaces:** Yields nominal secondary face improvements fluctuating around **5% to 8% total system yield expansion**.
+
+### Amortization Comparison
+While bifacial modules demand a slightly higher initial hardware procurement premium, their enhanced physical tracking and dual-side capture metrics reduce macro-level levelized cost of energy (LCOE) inputs significantly when deployed over highly reflective groundwork configurations.`
   }
-
-  // THE PERFORMANCE-FIRST WEB SHARE ENGINE
-  const handleShare = async () => {
-    const shareTitle = article.title;
-    const shareText = article.description || article.excerpt;
-    
-    // Constructs the exact deep-link parameter for your production domain loop
-    const shareUrl = `${window.location.origin}/?view=blog&article=${article.slug || article.id}`;
-
-    if (navigator.share) {
-      try {
-        // Leverages native mobile/OS system sheet (WhatsApp, Apple AirDrop, X, etc.)
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        });
-        console.log("Core asset routing shared successfully via native interface.");
-      } catch (error) {
-        console.log("Sharing pipeline closed gracefully by client agent:", error);
-      }
-    } else {
-      // Premium Fallback: Clipboard write for old or desktop browser windows
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        
-        // Fires a clean alert box (or you can link this to a custom modal/toast banner)
-        alert("Article link copied to clipboard successfully! Ready to share on Pinterest.");
-      } catch (err) {
-        console.error("System structural failure writing string variable to clipboard context: ", err);
-      }
-    }
-  };
-
-  return (
-    <article className="min-h-screen bg-slate-950 text-slate-100 selection:bg-amber-500/30 selection:text-amber-200 pb-20">
-      {/* HEADER TOP-BAR NAVIGATION MATRIX */}
-      <div className="max-w-4xl mx-auto px-4 pt-8 pb-4 flex items-center justify-between border-b border-white/5">
-        <button
-          onClick={onBackToHub}
-          className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400 hover:text-amber-400 font-medium transition-colors group"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="14" 
-            height="14" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2.5" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            className="transform group-hover:-translate-x-1 transition-transform"
-          >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          Back to Insights Index
-        </button>
-
-        {/* ACTIVATED HIGH-CONVERSION SHARE BUTTON */}
-<button
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Explicit inline execution matrix
-    const shareTitle = article.title;
-    const shareText = article.description || article.excerpt;
-    const shareUrl = `${window.location.origin}/?view=blog&article=${article.slug || article.id}`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: shareTitle,
-        text: shareText,
-        url: shareUrl,
-      })
-      .then(() => console.log("Successful share alignment"))
-      .catch((err) => console.log("Share skipped:", err));
-    } else {
-      // Direct browser fallback execution
-      navigator.clipboard.writeText(shareUrl)
-        .then(() => {
-          alert("Link copied to clipboard successfully!");
-        })
-        .catch((err) => {
-          console.error("Clipboard routing blocked:", err);
-        });
-    }
-  }}
-  className="p-2.5 rounded-full border border-white/10 bg-slate-900/40 hover:bg-white/5 text-slate-400 hover:text-amber-400 transition-all duration-200 shadow-md flex items-center justify-center group relative z-50 cursor-pointer"
-  title="Share this article"
-  aria-label="Share article"
->
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="18" 
-    height="18" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    className="pointer-events-none"
-  >
-    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-    <polyline points="16 6 12 2 8 6"/>
-    <line x1="12" y1="2" x2="12" y2="15"/>
-  </svg>
-</button>
-      </div>
-
-      {/* ARTICLE CONTENT FRAMEWORK HERO */}
-      <header className="max-w-3xl mx-auto px-4 pt-12 text-center">
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-widest font-mono text-slate-500 mb-4">
-          <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-white/5 text-amber-400/90">
-            {article.category}
-          </span>
-          <span>•</span>
-          <span>{article.date}</span>
-          <span>•</span>
-          <span className="text-slate-400">{article.readTime}</span>
-        </div>
-
-        <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white max-w-2xl mx-auto leading-tight md:leading-snug">
-          {article.title}
-        </h1>
-
-        <p className="text-xs text-slate-400 mt-3 font-medium tracking-wide">
-          By <span className="text-slate-300 font-semibold">{article.author}</span>
-        </p>
-      </header>
-
-      {/* PREMIUM VISUAL CONTENT WRAPPER */}
-      <div className="max-w-4xl mx-auto px-4 mt-8 rounded-[28px] overflow-hidden border border-white/5 shadow-2xl relative aspect-[21/9]">
-        <img 
-          src={article.image} 
-          alt={article.title}
-          className="w-full h-full object-cover transform hover:scale-102 transition-transform duration-700"
-          loading="eager"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-      </div>
-
-      {/* ARTICLE BODY CORE CONTAINER */}
-      <main className="max-w-2xl mx-auto px-4 mt-12">
-        <div className="text-slate-300 text-base md:text-lg leading-relaxed space-y-6 font-normal tracking-wide whitespace-pre-line drop-shadow-sm">
-          {/* Dynamically renders the complete engineering copy from your database array */}
-          {article.content}
-        </div>
-
-        {/* HIGH-CONVERTING CUSTOM AMZN NATIVE AFFILIATE INLINE BRIDGE */}
-        <div className="mt-14 p-6 rounded-2xl border border-white/5 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl -mr-8 -mt-8 transition-all group-hover:bg-amber-500/10" />
-          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <h3 className="text-amber-400 font-bold text-base tracking-wide">
-                Calculate Your Real-World System Layout Requirements
-              </h3>
-              <p className="text-xs text-slate-400 mt-1.5 max-w-lg leading-relaxed">
-                Don't guess component allocations blindly or get stuck with unfair retail vendor kits. Run your home bills through our free system analyzer to find verified hardware models directly on Amazon.
-              </p>
-            </div>
-            <button 
-              onClick={onNavigateToCalculator}
-              className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl tracking-widest uppercase transition-all whitespace-nowrap shadow-lg shadow-amber-500/15 border border-amber-400/20 active:scale-98"
-            >
-              Open Forecaster
-            </button>
-          </div>
-        </div>
-      </main>
-
-      {/* CONTEXTUAL FOOTER INFRASTRUCTURE */}
-      <footer className="max-w-2xl mx-auto px-4 mt-16 pt-6 border-t border-white/5 flex items-center justify-between text-xxs font-mono text-slate-600 tracking-wider">
-        <p>© 2026 Grid Pulse AI . Diagnostic Assessments.</p>
-        <button onClick={onBackToHub} className="hover:text-slate-400 transition-colors">
-          Index Matrix
-        </button>
-      </footer>
-    </article>
-  );
-};
-
-export default ArticleViewer;
+];
