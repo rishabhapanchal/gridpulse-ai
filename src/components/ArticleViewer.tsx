@@ -28,15 +28,21 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-[#070709] text-slate-200 flex flex-col items-center justify-center p-6">
-        <button onClick={onBack} className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-xs font-mono text-slate-300">
+      <div className="min-h-[60vh] bg-[#070709] text-slate-200 flex flex-col items-center justify-center text-center p-6">
+        <h2 className="text-xl font-bold text-amber-500">Article Node Missing</h2>
+        <p className="text-sm text-slate-400 mt-2 mb-6 max-w-sm">
+          The requested engineering forecast telemetry could not be found.
+        </p>
+        <button 
+          onClick={onBack} 
+          className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-xs font-mono text-slate-300 hover:text-amber-400 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" /> Return to Terminal
         </button>
       </div>
     );
   }
 
-  // Parses plain lines cleanly down to native styled paragraphs and headings
   const renderContent = (plainText: string) => {
     return plainText.split('\n').map((line, index) => {
       const trimmedLine = line.trim();
@@ -81,8 +87,6 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
 
   return (
     <article className="min-h-screen bg-[#070709] text-slate-100 antialiased selection:bg-amber-500/20 selection:text-amber-400">
-      
-      {/* NAVIGATION OVERLAY BAR */}
       <div className="sticky top-0 z-40 bg-[#070709]/80 backdrop-blur-md border-b border-neutral-900 px-4 py-3 sm:px-8 flex items-center justify-between">
         <button onClick={onBack} className="group flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 hover:text-amber-500 transition-colors">
           <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" /> Back to Hub
@@ -92,12 +96,11 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
         </span>
       </div>
 
-      {/* TYPOGRAPHY WRAPPER FRAME */}
       <header className="max-w-4xl mx-auto pt-8 px-4 text-center">
         <div className="flex items-center justify-center gap-4 text-xs font-mono text-slate-500 mb-4">
           <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{article.date}</span>
           <span>•</span>
-          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{article.readTime || '5 min read'}</span>
+          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{article.readTime || `5 min read`}</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black text-slate-100 mb-6 leading-tight max-w-3xl mx-auto tracking-tight">
           {article.title}
@@ -113,7 +116,6 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
         )}
       </header>
 
-      {/* CORE ANALYSIS CONTENT MARKUP */}
       <main className="max-w-2xl mx-auto px-4 pb-20">
         <div className="prose prose-invert max-w-none">{renderContent(article.content)}</div>
         
@@ -128,7 +130,6 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
         )}
       </main>
 
-      {/* FOOTER METRIC RECOMMENDATIONS ARCHITECTURE */}
       {relatedArticles.length > 0 && (
         <section className="bg-[#0b0b0e] border-t border-neutral-900 py-12 px-4">
           <div className="max-w-4xl mx-auto">
