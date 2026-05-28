@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import {
   Sun,
   Zap,
@@ -63,8 +63,57 @@ export function App() {
     return `${country.symbol}${val.toFixed(2)}`;
   };
 
+  // USER INTERFACE ROUTING VIEW STATE CONTROLLER
   const [currentView, setCurrentView] = useState<'landing' | 'blog' | 'article'>('landing');
   const [selectedArticleId, setSelectedArticleId] = useState<string>('');
+  
+  // ----------------------------------------------------------------
+  // NAVIGATION FIXED CORE ENGINE: Sync View Changes with Browser History
+  // ----------------------------------------------------------------
+  useEffect(() => {
+    // Intercept hardware and software browser navigation actions
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.view) {
+        setCurrentView(event.state.view);
+        if (event.state.articleId) {
+          setSelectedArticleId(event.state.articleId);
+        }
+      } else {
+        // Default fallback back to landing layout
+        setCurrentView('landing');
+      }
+    };
+
+    // Initialize root landing history baseline so the browser knows where it started
+    if (!window.history.state) {
+      window.history.replaceState({ view: 'landing' }, '');
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // INTERACTIVE NAVIGATION HANDLERS WITH HISTORY PUSH OVERRIDES
+  const handleNavigateToBlog = () => {
+    window.history.pushState({ view: 'blog' }, '');
+    setCurrentView('blog');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToArticle = (id: string) => {
+    window.history.pushState({ view: 'article', articleId: id }, '');
+    setSelectedArticleId(id);
+    setCurrentView('article');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToHome = () => {
+    window.history.pushState({ view: 'landing' }, '');
+    setCurrentView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  // ----------------------------------------------------------------
+
   const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms'>('privacy');
   const [isLegalModalOpen, setIsLegalModalOpen] = useState<boolean>(false);
   const [apiStatus, setApiStatus] = useState<{
@@ -120,22 +169,6 @@ export function App() {
   const [activeTab, setActiveTab] = useState<'financial' | 'environmental'>('financial');
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [billData, setBillData] = useState<ExtractedBillData | null>(null);
-
-  const handleNavigateToBlog = () => {
-    setCurrentView('blog');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleNavigateToArticle = (id: string) => {
-    setSelectedArticleId(id);
-    setCurrentView('article');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleNavigateToHome = () => {
-    setCurrentView('landing');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const handleOpenLegal = (type: 'privacy' | 'terms') => {
     setLegalModalType(type);
@@ -241,7 +274,7 @@ export function App() {
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
       </div>
 
-      {/* AUTOMATED: Header content auto-wraps cleanly via flex-wrap and fluid utility gaps */}
+      {/* HEADER NAVBAR CONTAINER */}
       <header className="relative z-40 border-b border-white/5 bg-black/60 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 min-h-16 py-3 flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
           <button 
@@ -262,7 +295,6 @@ export function App() {
             </div>
           </button>
 
-          {/* AUTOMATED: Action triggers fluidly condense or shorten labeling string length natively */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs ml-auto sm:ml-0">
             <span className="hidden lg:inline-block text-slate-400 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 font-mono">
               Irradiance Model: v4.12
@@ -369,11 +401,10 @@ export function App() {
             exit={{ opacity: 0 }}
             className="relative z-10 flex-grow w-full max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6 sm:gap-8"
           >
-            {/* HERO MODULE WITH AUTOMATED CLAMP TITLES */}
+            {/* HERO MODULE */}
             <div className="relative glass-panel p-5 sm:p-8 rounded-[28px] overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
               <div className="max-w-2xl">
-                {/* AUTOMATED fluid layout clamping headline */}
                 <h1 className="text-[clamp(1.25rem,4vw,1.625rem)] font-glass-title font-bold tracking-tight text-slate-100">
                   Grid Pulse AI
                 </h1>
@@ -397,8 +428,6 @@ export function App() {
 
             {/* DASHBOARD GRID MATRIX */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              
-              {/* LEFT COLUMN CONTROLS */}
               <section id="savings-calibration" className="lg:col-span-5 flex flex-col gap-6 w-full">
                 <div className="relative glass-panel rounded-[28px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                   <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-slate-600/40 to-transparent"></div>
@@ -421,7 +450,6 @@ export function App() {
                         Monthly Electricity Bill
                       </label>
                       
-                      {/* Touch-safe increment steps */}
                       <div className="flex items-center space-x-2">
                         <button 
                           type="button"
@@ -468,8 +496,6 @@ export function App() {
 
                     <div className="pt-1.5">
                       <div className="text-[11px] font-mono text-slate-450 uppercase tracking-wider mb-2">Quick Grid Presets</div>
-                      
-                      {/* AUTOMATED: auto-fitting matrix splits rows instantly if container collapses */}
                       <div className="grid grid-cols-[repeat(auto-fit,minmax(64px,1fr))] gap-1.5 sm:gap-2">
                         {billPresets.map((val) => {
                           const isSelected = state.monthlyBill === val;
@@ -479,9 +505,7 @@ export function App() {
                               type="button"
                               onClick={() => handleBillChange(val)}
                               className={`py-2 text-[11px] font-mono font-bold rounded-xl border cursor-pointer truncate px-0.5 text-center ${
-                                isSelected
-                                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/40'
-                                  : 'bg-slate-950/85 text-slate-400 border-slate-800/80 hover:border-slate-700'
+                                isSelected ? 'bg-amber-500/10 text-amber-300 border-amber-500/40' : 'bg-slate-950/85 text-slate-400 border-slate-800/80'
                               }`}
                             >
                               {formatCurrency(val)}
@@ -498,7 +522,6 @@ export function App() {
                       Roof Orientation Multiplier
                     </label>
 
-                    {/* AUTOMATED: Drops to single stacked elements natively on mini devices */}
                     <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-2.5">
                       {(['south', 'west', 'east', 'north'] as RoofOrientation[]).map((orientation) => {
                         const isSelected = state.roofOrientation === orientation;
@@ -568,7 +591,7 @@ export function App() {
                               step={stepRate}
                               value={state.utilityRate}
                               onChange={handleRateChange}
-                              className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer scenic-slider"
+                              className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer"
                             />
                           </div>
 
@@ -619,7 +642,6 @@ export function App() {
                         <CloudLightning className="w-3.5 h-3.5 text-amber-400" />
                         Assessment
                       </span>
-                      {/* AUTOMATED fluid scaling typography */}
                       <h2 className="text-[clamp(1.1rem,3.5vw,1.25rem)] font-glass-title font-bold tracking-tight mt-2.5">Estimated Yearly Savings</h2>
                     </div>
                     <span className="text-[9px] font-mono text-slate-450 bg-black border border-white/5 px-2 py-0.5 rounded-md">Bill * 12 * 95%</span>
@@ -658,7 +680,6 @@ export function App() {
                   </button>
                 </div>
 
-                {/* AUTOMATED: Switches grid columns layout fluidly depending on screen real-estate bounds */}
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
                   {activeTab === 'financial' ? (
                     <React.Fragment key="financial-metrics">
@@ -708,7 +729,6 @@ export function App() {
         )}
       </AnimatePresence>
 
-      {/* FOOTER AUTOMATED ADAPTIVE WRAPPING MATRIX */}
       <footer className="border-t border-white/5 bg-black py-8 mt-auto relative z-10 text-slate-500 text-xs text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-5">
           <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center text-[10px] font-mono font-semibold tracking-wider text-slate-400">
