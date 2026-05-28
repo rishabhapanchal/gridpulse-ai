@@ -1,354 +1,160 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import React from 'react';
+import { ShoppingCart, ExternalLink, ShieldCheck, Truck, Package, HelpCircle } from 'lucide-react';
+import { motion } from 'motion/react';
 
-import React, { useState } from 'react';
-import { 
-  ShoppingBag, 
-  ExternalLink, 
-  Layers, 
-  Cpu, 
-  BatteryCharging, 
-  Wrench, 
-  ShieldCheck, 
-  Award,
-  ArrowRight
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { CountryConfig } from '../utils/countryConfig';
-import { CalculatorResults } from '../types';
+interface CountryConfig {
+  code: string;
+  currency: string;
+  symbol: string;
+  typicalSolarCostPerWatt: number;
+}
 
 interface SolarHardwareStoreProps {
   country: CountryConfig;
-  results: CalculatorResults;
+  results: {
+    panelsNeeded: number;
+    systemSizeKw: number;
+    netCost: number;
+  };
   panelsNeeded: number;
   systemSizeKw: number;
+  localizedAmazonUrl?: string; // Derived from App.tsx region state
 }
-
-interface ProductTemplate {
-  name: string;
-  category: 'panel' | 'inverter' | 'battery' | 'accessory';
-  description: string;
-  baseUsdPrice: number;
-  searchQuery: (panels: number, kw: number) => string;
-  bulletSpecs: (panels: number, kw: number) => string[];
-  icon: React.ComponentType<any>;
-}
-
-const AMAZON_DOMAINS: Record<string, string> = {
-  US: 'amazon.com',
-  IN: 'amazon.in',
-  DE: 'amazon.de',
-  GB: 'amazon.co.uk',
-  AU: 'amazon.com.au',
-  CA: 'amazon.ca',
-  JP: 'amazon.co.jp',
-  ZA: 'amazon.co.za',
-  AE: 'amazon.ae'
-};
-
-const PRODUCT_TEMPLATES: ProductTemplate[] = [
-  {
-    name: "Monocrystalline High-Yield Solar Panels",
-    category: 'panel',
-    description: "Anti-reflective tempered glass solar panels tailored to high snow & wind load resistance.",
-    baseUsdPrice: 220, // Per panel base rate
-    searchQuery: (panels) => `Renogy monocrystalline solar panels 400W ${panels} pack`,
-    bulletSpecs: (panels) => [
-      `Suggested setup: ${panels} x 400W panels`,
-      "Cell Efficiency: > 22.8%",
-      "25-Year transferable power warranty"
-    ],
-    icon: Layers
-  },
-  {
-    name: "Smart grid-tie MPPT Inverter",
-    category: 'inverter',
-    description: "Dual-MPPT tracking inverter to synchronize solar DC electricity into clean AC grid power.",
-    baseUsdPrice: 850,
-    searchQuery: (_, kw) => `pure sine wave grid tie inverter MPPT ${Math.ceil(kw)}kW`,
-    bulletSpecs: (_, kw) => [
-      `Suited capacity: ${kw.toFixed(1)} kW power input`,
-      "Peak Efficiency: 98.2%",
-      "WiFi-enabled cloud diagnostics dashboard"
-    ],
-    icon: Cpu
-  },
-  {
-    name: "Deep Cycle LiFePO4 Battery Bank",
-    category: 'battery',
-    description: "Eco-safe solar storage unit featuring smart BMS monitoring and high current discharges.",
-    baseUsdPrice: 580,
-    searchQuery: () => "LiFePO4 battery 48V 100Ah solar deep cycle storage bank",
-    bulletSpecs: () => [
-      "Capacity: 48V 100Ah (4.8 kWh storage)",
-      "Standard Lifecycle: 6,000+ cycles",
-      "Overcharge / Thermal runaway protection"
-    ],
-    icon: BatteryCharging
-  },
-  {
-    name: "Weatherproof MC4 Connection Extension Cables",
-    category: 'accessory',
-    description: "Twin-core solar extension cables with sealed connectors for minimal signal propagation loss.",
-    baseUsdPrice: 42,
-    searchQuery: () => "10 AWG solar panel extension cable with MC4 male female connectors 50 feet",
-    bulletSpecs: () => [
-      "Length: 50ft / 15m double wire core",
-      "Rating: 10 AWG heavy duty copper strands",
-      "IP68 waterproof dustproof sealed couplers"
-    ],
-    icon: Wrench
-  },
-  {
-    name: "Heavy-Duty Rooftop Mounting Z-Brackets & Rails",
-    category: 'accessory',
-    description: "Rustproof structural aluminum brackets customized for quick angled roof attachment.",
-    baseUsdPrice: 35,
-    searchQuery: (panels) => `solar panel roof Z brackets mounting kits ${panels > 4 ? 'heavy duty rails' : '4 pack'}`,
-    bulletSpecs: (panels) => [
-      `Holds: Full roof mounting layout for ${panels} panels`,
-      "Material: Corrosive-resistant structural alloy",
-      "Includes all hex screws and flange nuts"
-    ],
-    icon: Wrench
-  }
-];
 
 export default function SolarHardwareStore({
   country,
   results,
   panelsNeeded,
-  systemSizeKw
+  systemSizeKw,
+  localizedAmazonUrl,
 }: SolarHardwareStoreProps) {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'panel' | 'inverter' | 'battery' | 'accessory'>('all');
   
-  // Amazon Associate ID Store tag (configurable via environment variables for user privacy)
-  const affiliateTag = (import.meta as any).env?.VITE_AMAZON_ASSOCIATE_ID || "gridpulse-20";
-  const amazonDomain = AMAZON_DOMAINS[country.code] || 'amazon.com';
+  // Clean fallback if the link isn't fully generated upstream
+  const amazonSearchLink = localizedAmazonUrl || `https://www.amazon.com/s?k=Monocrystalline+Solar+Panels+400W`;
 
-  // Format currency dynamically based on the country rates
-  const formatLocalCost = (usdBase: number, multiplyByPanels: boolean = false) => {
-    const rawUsdValue = multiplyByPanels ? usdBase * panelsNeeded : usdBase;
-    // Calculate according to regional conversion rates
-    const localValue = rawUsdValue * country.conversionRateFromUSD;
-    
-    try {
-      return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
-        style: 'currency',
-        currency: country.currency,
-        maximumFractionDigits: 0,
-      }).format(localValue);
-    } catch {
-      return `${country.symbol}${localValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  // Dynamic hardware hardware specifications dictionary matrix matching system calculations
+  const hardwareItems = [
+    {
+      id: 'pv-modules',
+      name: 'Tier-1 Monocrystalline High-Yield PV Panels',
+      specs: `${panelsNeeded}x 400W Modules | Solid Tempered Glass`,
+      description: 'Ultra-high efficiency multi-busbar panels optimized for extreme low-light photon absorption metrics.',
+      priceEstimate: results.netCost * 0.45, // Proportional estimation matrix
+      searchQuery: `${panelsNeeded} Monocrystalline Solar Panels 400W`
+    },
+    {
+      id: 'hybrid-inverter',
+      name: 'Smart Grid-Tied Hybrid MPPT Inverter',
+      specs: `${Math.ceil(systemSizeKw)}kW Capacity Pure Sine Wave System`,
+      description: 'Dual phase logic engine with integrated automatic transfer switching and real-time app telemetry links.',
+      priceEstimate: results.netCost * 0.25,
+      searchQuery: `${Math.ceil(systemSizeKw)}kW Grid Tied Solar Inverter`
+    },
+    {
+      id: 'storage-battery',
+      name: 'Lithium Iron Phosphate (LiFePO4) Battery Pack',
+      specs: '48V 100Ah | 5,000+ Deep Continuous Life Cycles',
+      description: 'Thermal-runaway proof high-density safe modular home energy cell backup expansion array.',
+      priceEstimate: results.netCost * 0.30,
+      searchQuery: '48V 100Ah LiFePO4 Solar Battery Backup'
     }
-  };
+  ];
 
-  // Generate the clean, valid Amazon affiliate search URL
-  const getAffiliateUrl = (query: string) => {
-    const encodedQuery = encodeURIComponent(query);
-    return `https://www.${amazonDomain}/s?k=${encodedQuery}&tag=${affiliateTag}`;
+  // Helper formatting calculation
+  const formatLocalPrice = (val: number) => {
+    return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
+      style: 'currency',
+      currency: country.currency,
+      maximumFractionDigits: 0,
+    }).format(val);
   };
-
-  // Filter products by toggled tab
-  const filteredProducts = PRODUCT_TEMPLATES.filter(p => 
-    activeCategory === 'all' ? true : p.category === activeCategory
-  );
 
   return (
-    <section id="solar-hardware-marketplace" className="w-full mt-10 p-6 glass-panel border-amber-500/10 rounded-[32px] overflow-hidden relative shadow-[0_12px_40px_rgba(0,0,0,0.7)] group">
-      {/* Visual highlights */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-105" />
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
-
-      {/* Program Partner Badge */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-white/5 z-10 relative">
-        <div className="space-y-1.5 text-left">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono tracking-widest uppercase font-extrabold rounded-full">
-            <ShoppingBag className="w-3.5 h-3.5 animate-pulse" />
+    <div className="relative glass-panel rounded-[28px] p-5 sm:p-7 border border-white/5 bg-slate-900/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+      
+      {/* HUB HEADERS */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-5 mb-6">
+        <div className="space-y-1">
+          <span className="text-[9px] font-mono text-amber-400 uppercase tracking-widest font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md inline-block">
             Integrators Tool & Hardware Deck
           </span>
-          <h2 className="text-xl md:text-2xl font-glass-title font-bold tracking-tight text-white flex items-center gap-2">
+          <h2 className="text-lg font-glass-title font-bold tracking-tight text-slate-100 flex items-center gap-2">
+            <ShoppingCart className="w-4 h-4 text-amber-500" />
             Amazon Hardware Marketplace
           </h2>
-          <p className="text-xs text-slate-400 font-sans leading-relaxed max-w-2xl">
-            Acquire matching clean-energy equipment recommended directly for your calibrated <strong className="text-amber-300 font-mono">{systemSizeKw.toFixed(1)} kW</strong> setup. All components link to authorized local listings using regional portal optimizations under your local currency rates.
-          </p>
         </div>
-
-        {/* Amazon Associate Tag HUD (ID hidden from public UI for privacy) */}
-        <div className="bg-slate-950 border border-slate-850 rounded-2xl px-4 py-3 text-right flex flex-col items-end shrink-0 shadow-inner">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Verified Partner Integration</span>
-          </div>
-          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mt-1 block">
-            Amazon Associates Program Feed
-          </span>
+        <div className="text-[10px] font-mono text-slate-450 bg-black/40 border border-white/5 px-3 py-1 rounded-lg flex items-center gap-1.5">
+          <Truck className="w-3.5 h-3.5 text-amber-500" />
+          <span>Regional Delivery Active ({country.code})</span>
         </div>
       </div>
 
-      {/* Dynamic system configuration summary widget */}
-      <div className="my-5 bg-amber-500/5 border border-amber-500/15 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 z-10 relative">
-        <div className="flex items-center gap-3">
-          <div className="p-2 sm:p-3 bg-amber-500/10 rounded-xl border border-amber-500/25 shrink-0">
-            <Award className="w-5.5 h-5.5 text-amber-400" />
-          </div>
-          <div className="text-left">
-            <div className="text-xs font-mono text-amber-300 uppercase tracking-wider font-extrabold">Configured Specs</div>
-            <div className="text-sm font-sans font-bold text-slate-200 mt-0.5">
-              Ideal DIY solar build out requires ~<span className="text-amber-400">{panelsNeeded} PV panels</span> of <span className="text-amber-400">400W rating</span>
+      {/* HARDWARE SPECIFICATION GRID LAYOUT MATRIX */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+        {hardwareItems.map((item) => (
+          <div 
+            key={item.id} 
+            className="bg-slate-950/60 border border-slate-850 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:border-slate-700 group relative"
+          >
+            <div className="space-y-2">
+              <div className="flex justify-between items-start gap-2">
+                <span className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800 uppercase tracking-wide truncate max-w-[180px]">
+                  {item.specs}
+                </span>
+                <Package className="w-4 h-4 text-slate-600 group-hover:text-amber-500 transition-colors shrink-0" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-200 group-hover:text-slate-100 transition-colors leading-snug">
+                {item.name}
+              </h3>
+              <p className="text-[11px] text-slate-450 leading-relaxed font-sans line-clamp-3">
+                {item.description}
+              </p>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-slate-900 flex items-center justify-between gap-2">
+              <div>
+                <div className="text-[9px] font-mono text-slate-500 uppercase">Est. Local Price</div>
+                <div className="text-sm font-mono font-bold text-amber-400 mt-0.5">
+                  {formatLocalPrice(item.priceEstimate)}
+                </div>
+              </div>
+              
+              <a
+                href={amazonSearchLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/30 hover:bg-amber-500/5 text-slate-400 hover:text-amber-400 transition-all duration-200 cursor-pointer shadow-inner"
+                title={`Search exact item on Amazon ${country.code}`}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-          <span className="text-[10px] font-mono text-slate-400 py-1 px-2.5 bg-black/45 border border-white/5 rounded-lg">
-            Active Regional Feed: {country.flag} Amazon.{amazonDomain}
-          </span>
-        </div>
+        ))}
       </div>
 
-      {/* CATEGORY SELECTOR TABS */}
-      <div className="flex flex-wrap gap-1.5 pt-1 pb-4 z-10 relative">
-        {[
-          { id: 'all', label: 'All Hardware', icon: ShoppingBag },
-          { id: 'panel', label: 'Solar Panels', icon: Layers },
-          { id: 'inverter', label: 'Inverters & MPPT', icon: Cpu },
-          { id: 'battery', label: 'Storage Battery', icon: BatteryCharging },
-          { id: 'accessory', label: 'Connectors & Mounts', icon: Wrench }
-        ].map((tab) => {
-          const isSelected = activeCategory === tab.id;
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveCategory(tab.id as any)}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border ${
-                isSelected
-                  ? 'bg-amber-400/15 text-amber-300 border-amber-500/30 shadow-md'
-                  : 'bg-slate-900/60 text-slate-400 border-slate-850 hover:bg-slate-900 hover:text-slate-200 hover:borderColor border-white/5'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-400' : 'text-slate-500'}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* COMPONENT STORE LISTINGS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 z-10 relative">
-        <AnimatePresence mode="popLayout">
-          {filteredProducts.map((p, idx) => {
-            const isPanel = p.category === 'panel';
-            const costFormatted = formatLocalCost(p.baseUsdPrice, isPanel);
-            const rawLocalValue = p.baseUsdPrice * (isPanel ? panelsNeeded : 1) * country.conversionRateFromUSD;
-            const queryText = p.searchQuery(panelsNeeded, systemSizeKw);
-            const affiliateLink = getAffiliateUrl(queryText);
-            const ProductIcon = p.icon;
-
-            return (
-              <motion.div
-                layout
-                key={p.name}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2, delay: idx * 0.05 }}
-                className="bg-slate-950/75 border border-slate-855 hover:border-amber-500/25 rounded-2xl p-4 flex flex-col justify-between group/card transition-all duration-300 hover:shadow-[0_4px_20px_rgba(245,158,11,0.03)]"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-1 mb-3">
-                    <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-amber-400 group-hover/card:bg-amber-500/5 group-hover/card:border-amber-500/20 transition-all duration-300">
-                      <ProductIcon className="w-5 h-5" />
-                    </div>
-                    {isPanel && (
-                      <span className="text-[10px] uppercase font-mono font-extrabold tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-lg">
-                        Qty: {panelsNeeded} Recommended
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-sm font-bold text-slate-100 group-hover/card:text-amber-300 transition-colors duration-300 text-left">
-                    {p.name}
-                  </h3>
-                  <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed text-left min-h-[34px]">
-                    {p.description}
-                  </p>
-
-                  <div className="my-3.5 border-t border-b border-white/5 py-2.5">
-                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest text-left block">
-                      Target Equipment Specs
-                    </span>
-                    <ul className="space-y-1 mt-1.5">
-                      {p.bulletSpecs(panelsNeeded, systemSizeKw).map((spec, sIdx) => (
-                        <li key={sIdx} className="text-[10px] text-slate-300 flex items-center gap-1.5 text-left font-sans">
-                          <span className="w-1 h-1 rounded-full bg-amber-400 shrink-0" />
-                          <span className="truncate">{spec}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <div className="flex items-baseline justify-between mb-3 text-left">
-                    <div>
-                      <span className="text-xs font-mono text-slate-500 block leading-tight">Est. Market Cost</span>
-                      <span className="text-lg font-mono font-bold text-slate-200">
-                        {costFormatted}
-                      </span>
-                    </div>
-                    {isPanel && (
-                      <span className="text-[9px] text-slate-500 font-mono">
-                        {formatLocalCost(p.baseUsdPrice)} / unit
-                      </span>
-                    )}
-                  </div>
-
-                  <a
-                    href={affiliateLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2 px-3.5 bg-amber-500 text-black font-sans font-bold text-xs rounded-xl hover:bg-amber-450 active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 transition-all duration-350 shadow-inner group/btn"
-                  >
-                    <span>Procure on Amazon</span>
-                    <ExternalLink className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform duration-300" />
-                  </a>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* HIGH-CONVERSION SPONSORED BANNER CALLOUT */}
-      <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 p-5 bg-gradient-to-r from-amber-500/5 to-transparent border border-amber-500/10 rounded-2xl text-left z-10 relative">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] font-mono bg-amber-400 text-black px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">AD</span>
-            <h4 className="text-xs font-extrabold text-slate-200 uppercase tracking-widest font-sans">
-              Solar DIY Starter Kits & Powerstations
-            </h4>
-          </div>
-          <p className="text-[11px] text-slate-400 leading-normal max-w-xl">
-            Sourcing an all-in-one bundle is ideal for beginners. Explore completely integrated plug-and-play kits including portable powerstations with solar panel briefcases on Amazon.
+      {/* DISCLOSURE FOOTER BANNER ACTIONS */}
+      <div className="p-4 bg-slate-950/40 border border-slate-850/60 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-start gap-2.5 max-w-2xl text-left">
+          <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0 translate-y-0.5" />
+          <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
+            <strong>Verified Partner Integration:</strong> All system components map directly back to target local inventory channels. Procurement triggers secure tracking logs configuration setup models to optimize your design pipeline hardware specs.
           </p>
         </div>
 
-        <a
-          href={getAffiliateUrl("Renogy Solar Panel Kit or Jackery Solar Generator")}
+        <motion.a
+          href={amazonSearchLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-amber-500/20 text-amber-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all duration-300 cursor-pointer text-center whitespace-nowrap"
+          whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(245,158,11,0.25)' }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full sm:w-auto text-center shrink-0 bg-amber-500 hover:bg-amber-400 text-black font-mono font-black text-xs uppercase px-6 py-3 rounded-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
         >
-          <span>Browse Complete Bundles</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </a>
+          <span>Procure Complete DIY Solar Kit</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </motion.a>
       </div>
-
-    </section>
+    </div>
   );
 }
