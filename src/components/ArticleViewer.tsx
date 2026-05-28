@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ArrowLeft, Clock, Calendar, Tag, Share2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, Tag, BookOpen } from 'lucide-react';
 import { Article } from '../data/articles';
 
 interface ArticleViewerProps {
@@ -29,7 +29,7 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
   if (!article) {
     return (
       <div className="min-h-[60vh] bg-[#070709] text-slate-200 flex flex-col items-center justify-center text-center p-6">
-        <h2 className="text-xl font-bold text-amber-500">Article Node Missing</h2>
+        <h2 className="text-xl font-bold text-amber-500">Article Missing Matrix Node</h2>
         <p className="text-sm text-slate-400 mt-2 mb-6 max-w-sm">
           The requested engineering forecast telemetry could not be found.
         </p>
