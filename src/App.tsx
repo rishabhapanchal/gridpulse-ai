@@ -31,7 +31,7 @@ import BillAnalyzer, { ExtractedBillData } from './components/BillAnalyzer';
 import { COUNTRIES } from './utils/countryConfig';
 import SolarHardwareStore from './components/SolarHardwareStore';
 
-// FIXED: Named imports match the "export const" declarations inside your layout architecture
+// BLOG CONTENT REAL ESTATE MODULES
 import { BlogHub } from './components/BlogHub';
 import { ArticleViewer } from './components/ArticleViewer';
 import { ARTICLES } from './data/articles';
