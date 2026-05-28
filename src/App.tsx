@@ -31,9 +31,10 @@ import BillAnalyzer, { ExtractedBillData } from './components/BillAnalyzer';
 import { COUNTRIES } from './utils/countryConfig';
 import SolarHardwareStore from './components/SolarHardwareStore';
 
-// BLOG CONTENT REAL ESTATE MODULES
-import BlogHub from './components/BlogHub';
-import ArticleViewer from './components/ArticleViewer';
+// FIXED: Named imports match the "export const" declarations inside your layout architecture
+import { BlogHub } from './components/BlogHub';
+import { ArticleViewer } from './components/ArticleViewer';
+import { ARTICLES } from './data/articles';
 
 // COMPLIANCE AND PROTECTION INTERFACE LAYER MODALS
 import LegalModal from './components/LegalModal';
@@ -75,10 +76,6 @@ export function App() {
 
   // ----------------------------------------------------------------
   // GEO AUTO-DETECTION: Detect user country via IP on first load.
-  // Uses ipapi.co (free, no key required). Result is cached in
-  // sessionStorage so it only fires once per browser session.
-  // Falls back silently to 'US' if detection fails or country is
-  // not in the supported list.
   // ----------------------------------------------------------------
   useEffect(() => {
     const cached = sessionStorage.getItem('gp_detected_country');
@@ -281,7 +278,6 @@ export function App() {
     setSelectedCountryCode(newCode);
     setIsCountryDropdownOpen(false);
 
-    // Also update sessionStorage so manual override persists for the session
     sessionStorage.setItem('gp_detected_country', newCode);
 
     const ratio = newCountry.conversionRateFromUSD / oldCountry.conversionRateFromUSD;
@@ -326,28 +322,17 @@ export function App() {
     });
   };
 
-  /**
-   * Generates a fully qualified, localized Amazon affiliate link.
-   * Smart-detects ASINs vs Search Queries to prevent 404 routing errors.
-   * @param asinOrQuery Unique 10-char ASIN or a raw/encoded search text string
-   * @returns Formatted URL string matching OneLink and marketplace standards
-   */
   const getRegionalAmazonLink = (asinOrQuery: string): string => {
     const targetCode = selectedCountryCode.toUpperCase();
     const domain = AMAZON_MARKETPLACE_DOMAINS[targetCode] || AMAZON_MARKETPLACE_DOMAINS.DEFAULT;
     const tag = AMAZON_ASSOCIATE_TAGS[targetCode] || AMAZON_ASSOCIATE_TAGS.DEFAULT;
     
-    // Clean up the parameter to check its format
     const cleanInput = decodeURIComponent(asinOrQuery).trim();
-    
-    // Amazon ASINs are alphanumeric and exactly 10 characters long
     const isAsin = /^[A-Z0-9]{10}$/i.test(cleanInput);
 
     if (isAsin) {
-      // Direct Product Page Routing
       return `https://www.${domain}/dp/${cleanInput}?tag=${tag}`;
     } else {
-      // Search Results Marketplace Routing (Fixes the 404 issue with queries)
       return `https://www.${domain}/s?k=${asinOrQuery}&tag=${tag}`;
     }
   };
@@ -696,8 +681,8 @@ export function App() {
                             <div className="grid grid-cols-3 gap-1.5">
                               {[380, 400, 420].map((watt) => (
                                 <button
-                                  key={watt}
                                   type="button"
+                                  key={watt}
                                   onClick={() => setState((prev) => ({ ...prev, panelCapacity: watt }))}
                                   className={`py-1 text-[11px] font-mono rounded border ${
                                     state.panelCapacity === watt ? 'bg-amber-400/10 text-amber-300 border-amber-400/40' : 'bg-slate-950 text-slate-500 border-slate-850'
@@ -753,9 +738,9 @@ export function App() {
                     <span className="text-xs text-slate-400 uppercase font-semibold tracking-wide">/ yr saved</span>
                   </div>
 
-                  <p className="text-xs sm:text-sm font-glass-body leading-relaxed border-t border-white/5 pt-4">
+                  <div className="text-xs sm:text-sm font-glass-body leading-relaxed border-t border-white/5 pt-4">
                     Adjusting electricity costs offsets energy charges by <strong>95%</strong>. Generating solar power on-site yields <strong className="text-amber-400 font-mono">{formatCurrency(results.yearlySavings / 12)}</strong> monthly utility credits.
-                  </p>
+                  </div>
                 </div>
 
                 <div className="bg-slate-950 border border-slate-850 rounded-2xl p-1 grid grid-cols-2 shadow-inner">
@@ -766,7 +751,7 @@ export function App() {
                       activeTab === 'financial' ? 'bg-slate-900 text-slate-100 border border-slate-850 shadow-md' : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <DollarSign className="w-4 h-4 text-amber-400" />
+                    <Paperclip className="w-4 h-4 text-amber-400" />
                     Financials
                   </button>
                   <button
@@ -828,13 +813,18 @@ export function App() {
 
         {currentView === 'blog' && (
           <motion.div key="blog-hub-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <BlogHub onSelectArticle={handleNavigateToArticle} onBack={handleNavigateToHome} />
+            <BlogHub onSelectArticle={handleNavigateToArticle} />
           </motion.div>
         )}
 
         {currentView === 'article' && (
           <motion.div key="article-viewer-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <ArticleViewer articleId={selectedArticleId} onBack={handleNavigateToBlog} />
+            <ArticleViewer 
+              currentSlug={selectedArticleId} 
+              articles={ARTICLES} 
+              onBack={handleNavigateToBlog} 
+              onNavigateToArticle={handleNavigateToArticle} 
+            />
           </motion.div>
         )}
       </AnimatePresence>
