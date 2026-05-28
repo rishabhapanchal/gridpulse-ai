@@ -1,249 +1,200 @@
-import React, { useMemo } from 'react';
-import { ArrowLeft, Clock, Calendar, Tag, Share2, BookOpen } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { BookOpen, ArrowRight, Grid, Filter, Sparkles, ChevronDown } from 'lucide-react';
+import { ARTICLES } from '../data/articles';
 
-// Define the absolute structure of an Article to match your shared array data
-export interface Article {
-  slug: string;
-  title: string;
-  excerpt: string;
-  category: string;
-  date: string;
-  content: string;
-  image?: string;
-  readTime?: string;
-  tags?: string[];
+interface BlogHubProps {
+  onSelectArticle: (slug: string) => void;
 }
 
-interface ArticleViewerProps {
-  currentSlug: string;
-  articles: Article[];
-  onBack: () => void;
-  onNavigateToArticle: (slug: string) => void;
-}
+export const BlogHub: React.FC<BlogHubProps> = ({ onSelectArticle }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>(`All`);
+  const [visibleCount, setVisibleCount] = useState<number>(6);
 
-export const ArticleViewer: React.FC<ArticleViewerProps> = ({
-  currentSlug,
-  articles,
-  onBack,
-  onNavigateToArticle,
-}) => {
-  // 1. Find the current active article safely
-  const article = useMemo(() => {
-    return articles.find((a) => a.slug === currentSlug);
-  }, [currentSlug, articles]);
-
-  // 2. Generate Related Articles automatically (Same category, excluding current article)
-  const relatedArticles = useMemo(() => {
-    if (!article) return [];
-    return articles
-      .filter((a) => a.category === article.category && a.slug !== article.slug)
-      .slice(0, 3); // Cap at 3 related layout recommendations
-  }, [article, articles]);
-
-  // If the slug doesn't match anything, render a clean fallback state
-  if (!article) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0c] text-slate-200 flex flex-col items-center justify-center p-6">
-        <div className="text-center max-w-md">
-          <h2 className="text-2xl font-bold text-amber-500 mb-4">Article Not Found</h2>
-          <p className="text-slate-400 mb-6">The engineering analysis or forecast model you are looking for has been moved or updated.</p>
-          <button 
-            onClick={onBack}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all text-sm font-medium text-slate-300"
-          >
-            <ArrowLeft className="w-4 h-4" /> Return to Command Terminal
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // 3. Robust Content Renderer Component
-  // Formats plain text blocks containing headers (###), bold statements, and bullet points safely into clean Tailwind UI elements
-  const renderContent = (plainText: string) => {
-    const lines = plainText.split('\n');
-    return lines.map((line, index) => {
-      const trimmedLine = line.trim();
-
-      if (!trimmedLine) return <div key={index} className="h-4" />;
-
-      // H3 Headings (e.g., ### Sub-heading)
-      if (trimmedLine.startsWith('###')) {
-        return (
-          <h3 key={index} className="text-xl font-semibold text-amber-500 mt-8 mb-4 tracking-wide">
-            {trimmedLine.replace('###', '').trim()}
-          </h3>
-        );
-      }
-
-      // H2 Headings (e.g., ## Main Section)
-      if (trimmedLine.startsWith('##')) {
-        return (
-          <h2 key={index} className="text-2xl font-bold text-slate-100 mt-10 mb-5 border-b border-neutral-800/60 pb-2 tracking-tight">
-            {trimmedLine.replace('##', '').trim()}
-          </h2>
-        );
-      }
-
-      // Bullet Points
-      if (trimmedLine.startsWith('*') || trimmedLine.startsWith('-')) {
-        const cleanContent = trimmedLine.substring(1).trim();
-        return (
-          <ul key={index} className="list-disc list-outside pl-6 my-2 text-slate-300 space-y-1">
-            <li>{parseBoldText(cleanContent)}</li>
-          </ul>
-        );
-      }
-
-      // Regular Paragraphs
-      return (
-        <p key={index} className="text-slate-300 leading-relaxed text-[16px] mb-5 tracking-normal">
-          {parseBoldText(trimmedLine)}
-        </p>
-      );
+  // 1. Extract unified unique categories and dynamically calculate item counts
+  const categoriesWithCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: ARTICLES.length };
+    ARTICLES.forEach((article) => {
+      counts[article.category] = (counts[article.category] || 0) + 1;
     });
-  };
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  }, []);
 
-  // Helper function to turn dynamic inline markdown **text** into bold html JSX tags securely
-  const parseBoldText = (text: string) => {
-    const parts = text.split(/\*\*([\s\S]*?)\*\*/g);
-    return parts.map((part, i) => (i % 2 === 1 ? <strong key={i} className="text-amber-400 font-semibold">{part}</strong> : part));
+  // 2. Separate the Top 2 Articles to serve as prominent, cinematic Hero Features
+  const featuredArticles = useMemo(() => {
+    return ARTICLES.slice(0, 2);
+  }, []);
+
+  // 3. Filter the remaining articles dynamically based on the active category pill
+  const filteredArticles = useMemo(() => {
+    if (selectedCategory === `All`) {
+      return ARTICLES.slice(2); // Exclude heroes from the grid feed
+    }
+    return ARTICLES.filter((article) => article.category === selectedCategory);
+  }, [selectedCategory]);
+
+  // 4. Paginate out display parameters slice
+  const displayedGridArticles = useMemo(() => {
+    return filteredArticles.slice(0, visibleCount);
+  }, [filteredArticles, visibleCount]);
+
+  const hasMore = filteredArticles.length > visibleCount;
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setVisibleCount(6); // Reset pagination index on matrix shift
   };
 
   return (
-    <article className="min-h-screen bg-[#070709] text-slate-100 antialiased selection:bg-amber-500/20 selection:text-amber-400">
+    <div className="min-h-screen bg-[#070709] text-slate-100 antialiased font-sans px-4 sm:px-6 lg:px-8 py-12 selection:bg-amber-500/20 selection:text-amber-400">
       
-      {/* 1. TOP UTILITY BAR (Floating Navigation) */}
-      <div className="sticky top-0 z-40 bg-[#070709]/80 backdrop-blur-md border-b border-neutral-900 px-4 py-3 sm:px-8 flex items-center justify-between">
-        <button 
-          onClick={onBack}
-          className="group flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 hover:text-amber-500 transition-colors duration-200"
-        >
-          <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" />
-          Back to Hub
-        </button>
-        <div className="flex items-center gap-3">
-          <span className="text-xs px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 font-mono font-medium uppercase tracking-wider">
-            {article.category}
-          </span>
-          <button 
-            onClick={() => navigator.clipboard.writeText(window.location.href)}
-            className="p-1.5 text-slate-400 hover:text-slate-200 rounded-md hover:bg-neutral-900 transition-all"
-            title="Copy link to share"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
+      {/* HEADER ARCHITECTURE */}
+      <header className="max-w-6xl mx-auto text-center mb-16 relative">
+        <div className="absolute inset-x-0 -top-12 h-40 bg-gradient-to-b from-amber-500/10 to-transparent blur-3xl opacity-50 pointer-events-none" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono mb-4 tracking-wider uppercase">
+          <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Command Intelligence Terminal
         </div>
-      </div>
-
-      {/* 2. HERO HEADER SECTION */}
-      <header className="relative w-full max-w-5xl mx-auto pt-8 px-4 sm:px-6 lg:px-8 text-center">
-        <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-slate-500 mb-4">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-neutral-600" />
-            <span>{article.date}</span>
-          </div>
-          <span className="text-neutral-800">•</span>
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-neutral-600" />
-            <span>{article.readTime || '6 min read'}</span>
-          </div>
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-100 max-w-4xl mx-auto tracking-tight leading-[1.15] mb-6">
-          {article.title}
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-100 mb-4 leading-none">
+          Grid Pulse <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600">Intelligence Hub</span>
         </h1>
-
-        <p className="text-lg text-slate-400 max-w-3xl mx-auto font-medium leading-relaxed mb-8 border-l-2 border-amber-500/30 pl-4 sm:pl-6 text-left italic">
-          {article.excerpt}
+        <p className="text-slate-400 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+          Deep technical investigations, commercial infrastructure load profiles, regional subsidy application tracking, and next-generation clean energy data modeling.
         </p>
-
-        {/* Cinematic Featured Banner Frame */}
-        {article.image && (
-          <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl border border-neutral-900 my-8 group">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-transparent z-10 opacity-60" />
-            <img 
-              src={article.image} 
-              alt={article.title} 
-              className="w-full h-full object-cover transform scale-[1.01] group-hover:scale-105 transition-transform duration-700 ease-out"
-              loading="eager"
-            />
-          </div>
-        )}
       </header>
 
-      {/* 3. CORE ARTICLE COMPONENT WRAPPER */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-20">
-        <div className="prose prose-invert max-w-none prose-amber">
-          {renderContent(article.content)}
-        </div>
-
-        {/* Explicit Tag Footer */}
-        {article.tags && article.tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 border-t border-neutral-900 mt-12 pt-6">
-            <Tag className="w-3.5 h-3.5 text-neutral-600 mr-1" />
-            {article.tags.map((tag) => (
-              <span key={tag} className="text-xs bg-neutral-900/60 border border-neutral-800 text-slate-400 px-2.5 py-1 rounded-md font-mono">
-                #{tag}
-              </span>
-            ))}
+      {/* FEATURED HERO MATRIX (Top 2 Large Cinematic Cards) */}
+      {selectedCategory === `All` && (
+        <section className="max-w-6xl mx-auto mb-16">
+          <div className="flex items-center gap-2 mb-6 border-b border-neutral-900 pb-3">
+            <BookOpen className="w-4 h-4 text-amber-500" />
+            <h2 className="text-xs uppercase tracking-widest font-mono text-slate-400 font-bold">Featured Analysis Focus</h2>
           </div>
-        )}
-      </main>
-
-      {/* 4. DYNAMIC RELATED ARTICLES DRAWER */}
-      {relatedArticles.length > 0 && (
-        <section className="bg-[#0b0b0e] border-t border-neutral-900/80 py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-2 mb-10">
-              <BookOpen className="w-5 h-5 text-amber-500" />
-              <h4 className="text-lg font-bold tracking-tight text-slate-100">
-                Related Technical Metric Evaluations
-              </h4>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedArticles.map((item) => (
-                <div 
-                  key={item.slug}
-                  onClick={() => {
-                    onNavigateToArticle(item.slug);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="group bg-[#0e0e12] border border-neutral-900 hover:border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer flex flex-col h-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-                >
-                  {item.image && (
-                    <div className="relative aspect-[16/10] overflow-hidden bg-neutral-900 border-b border-neutral-900/40">
-                      <img 
-                        src={item.image} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                      <div className="absolute top-3 left-3 bg-[#070709]/80 backdrop-blur-sm text-[10px] font-mono font-medium uppercase tracking-wider text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">
-                        {item.category}
-                      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {featuredArticles.map((article) => (
+              <div 
+                key={article.slug}
+                onClick={() => onSelectArticle(article.slug)}
+                className="group relative h-[420px] rounded-2xl overflow-hidden border border-neutral-900 hover:border-neutral-800 cursor-pointer flex flex-col justify-end p-6 sm:p-8 transition-all duration-500 shadow-2xl bg-neutral-950/40"
+              >
+                {article.image && (
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <img 
+                      src={article.image} 
+                      alt={article.title} 
+                      className="w-full h-full object-cover transform scale-[1.01] group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-[#070709]/70 to-[#070709]/10" />
+                  </div>
+                )}
+                <div className="relative z-10 w-full">
+                  <span className="inline-block text-[10px] font-mono tracking-widest uppercase bg-amber-500 text-[#070709] px-2 py-0.5 rounded font-bold mb-3 shadow-md">
+                    {article.category}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-snug text-slate-100 group-hover:text-amber-400 transition-colors duration-300 mb-3">
+                    {article.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 leading-relaxed mb-4">
+                    {article.excerpt}
+                  </p>
+                  <div className="flex items-center justify-between pt-3 border-t border-neutral-800/60 text-xs font-mono text-slate-500">
+                    <div className="flex items-center gap-3">
+                      <span>{article.date}</span>
+                      <span>•</span>
+                      <span>{article.readTime || `6 min read`}</span>
                     </div>
-                  )}
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h5 className="text-sm font-bold text-slate-200 line-clamp-2 group-hover:text-amber-400 transition-colors duration-200 mb-2 leading-snug">
-                      {item.title}
-                    </h5>
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4 flex-grow">
-                      {item.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 mt-auto pt-2 border-t border-neutral-900/60">
-                      <span>{item.date}</span>
-                      <span>{item.readTime || '5 min'}</span>
-                    </div>
+                    <span className="flex items-center gap-1 text-amber-500 font-semibold group-hover:translate-x-1 transition-transform duration-300 text-[11px] uppercase tracking-wider">
+                      Evaluate <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </section>
       )}
 
-    </article>
+      {/* CATEGORY FILTER PILLS */}
+      <nav className="max-w-6xl mx-auto mb-10 flex flex-wrap items-center justify-start gap-2 border-b border-neutral-900/60 pb-6">
+        <div className="text-slate-500 flex items-center gap-1.5 mr-2 text-xs font-mono uppercase tracking-wider">
+          <Filter className="w-3.5 h-3.5" /> Filters:
+        </div>
+        {categoriesWithCounts.map((cat) => (
+          <button
+            key={cat.name}
+            onClick={() => handleCategoryChange(cat.name)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all duration-200 border flex items-center gap-1.5 ${
+              selectedCategory === cat.name
+                ? `bg-amber-500/10 border-amber-500 text-amber-400 font-bold shadow-lg`
+                : `bg-neutral-900/40 border-neutral-900/80 text-slate-400 hover:border-neutral-800 hover:text-slate-200`
+            }`}
+          >
+            {cat.name}
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+              selectedCategory === cat.name ? `bg-amber-500/20 text-amber-400` : `bg-neutral-950 text-slate-500`
+            }`}>
+              {cat.count}
+            </span>
+          </button>
+        ))}
+      </nav>
+
+      {/* ARTICLE FEED GRID MATRIX */}
+      <main className="max-w-6xl mx-auto">
+        {displayedGridArticles.length === 0 ? (
+          <div className="text-center py-20 border border-dashed border-neutral-900 rounded-2xl bg-neutral-950/20">
+            <Grid className="w-8 h-8 text-neutral-800 mx-auto mb-3" />
+            <p className="text-sm font-mono text-slate-500">No telemetry nodes matching this parameters frame.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedGridArticles.map((article) => (
+              <article
+                key={article.slug}
+                onClick={() => onSelectArticle(article.slug)}
+                className="group flex flex-col h-full bg-[#0d0d11]/40 border border-neutral-900 hover:border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+              >
+                {article.image && (
+                  <div className="relative aspect-[16/10] overflow-hidden bg-neutral-950 border-b border-neutral-900/40">
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-3 left-3 bg-[#070709]/80 backdrop-blur-sm text-[10px] font-mono font-medium uppercase tracking-wider text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">
+                      {article.category}
+                    </div>
+                  </div>
+                )}
+                <div className="p-5 flex flex-col flex-grow">
+                  <h3 className="text-base sm:text-17px font-bold text-slate-200 line-clamp-2 group-hover:text-amber-400 transition-colors duration-200 mb-2 leading-snug">
+                    {article.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 leading-relaxed mb-5 flex-grow">
+                    {article.excerpt}
+                  </p>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 mt-auto pt-3 border-t border-neutral-900/60">
+                    <span>{article.date}</span>
+                    <span>{article.readTime || `5 min`}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {/* PAGINATION INTERFACE: "SHOW MORE" TRIGGER MODULE */}
+        {hasMore && (
+          <div className="flex justify-center mt-12 border-t border-neutral-900/40 pt-8">
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 6)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-950 hover:bg-neutral-900 text-slate-300 hover:text-amber-400 text-xs sm:text-sm font-mono tracking-wider border border-neutral-900 hover:border-neutral-800 rounded-xl transition-all duration-200 shadow-lg group font-medium"
+            >
+              Show More Analytical Content 
+              <ChevronDown className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform duration-200" />
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
   );
 };
