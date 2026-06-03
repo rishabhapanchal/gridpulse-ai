@@ -416,7 +416,7 @@ export function App() {
             </span>
 
             <motion.button
-              type="module"
+              type="button"
               onClick={handleNavigateToBlog}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -552,7 +552,7 @@ export function App() {
                       <div className="p-2 bg-black border border-white/10 text-amber-400 rounded-xl">
                         <Sun className="w-4 h-4" />
                       </div>
-                      <h2 className="text-sm font-glass-title font-bold tracking-tight pb-0.5">
+                      h2 className="text-sm font-glass-title font-bold tracking-tight pb-0.5">
                         Savings Calibration
                       </h2>
                     </div>
