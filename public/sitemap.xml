@@ -2,98 +2,130 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://gridpulse.co.in/</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.00</priority>
   </url>
+
   <url>
-    <loc>https://gridpulse.co.in/blog/pm-surya-ghar-subsidy-guide</loc>
-    <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://gridpulse.co.in/blog</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://gridpulse.co.in/article/solar-payback-2026</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
+
   <url>
-    <loc>https://gridpulse.co.in/blog/is-3kw-solar-enough-residential</loc>
+    <loc>https://gridpulse.co.in/article/pm-surya-ghar-2026</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
+
   <url>
-    <loc>https://gridpulse.co.in/blog/commercial-solar-payback-period-2026</loc>
-    <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://gridpulse.co.in/article/commercial-solar-roi-2026</loc>
+    <lastmod>2026-05-25</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
+
   <url>
-    <loc>https://gridpulse.co.in/blog/bifacial-vs-monofacial-panels-cost</loc>
-    <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://gridpulse.co.in/article/bifacial-vs-monofacial-2026</loc>
+    <lastmod>2026-05-24</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
+
   <url>
-    <loc>https://gridpulse.co.in/blog/hybrid-inverter-battery-backup-necessity</loc>
+    <loc>https://gridpulse.co.in/article/adms-vs-derms-vs-scada-2026</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <url>
+    <loc>https://gridpulse.co.in/article/transformer-condition-monitoring-sensors</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <url>
+    <loc>https://gridpulse.co.in/article/is-3kw-solar-enough-residential</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/net-metering-policies-india-state-wise</loc>
+    <loc>https://gridpulse.co.in/article/hybrid-inverter-battery-backup-necessity</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/microinverter-vs-string-inverter-shading</loc>
+    <loc>https://gridpulse.co.in/article/net-metering-policies-india-state-wise</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/solar-panel-degradation-rates-25-years</loc>
+    <loc>https://gridpulse.co.in/article/microinverter-vs-string-inverter-shading</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/topcon-cell-technology-efficiency-gains</loc>
+    <loc>https://gridpulse.co.in/article/solar-panel-degradation-rates-25-years</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/solar-tax-credits-incentives-us-2026</loc>
+    <loc>https://gridpulse.co.in/article/topcon-cell-technology-efficiency-gains</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/cleaning-maintenance-solar-panels-yield-loss</loc>
+    <loc>https://gridpulse.co.in/article/solar-tax-credits-incentives-us-2026</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/solar-carport-ev-charging-integration</loc>
+    <loc>https://gridpulse.co.in/article/cleaning-maintenance-solar-panels-yield-loss</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/agricultural-solar-agrivoltaics-crop-yield</loc>
+    <loc>https://gridpulse.co.in/article/solar-carport-ev-charging-integration</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/smart-grid-home-automation-solar</loc>
+    <loc>https://gridpulse.co.in/article/agricultural-solar-agrivoltaics-crop-yield</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://gridpulse.co.in/blog/off-grid-solar-system-sizing-checklist</loc>
+    <loc>https://gridpulse.co.in/article/smart-grid-home-automation-solar</loc>
     <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://gridpulse.co.in/article/off-grid-solar-system-sizing-checklist</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
 </urlset>
