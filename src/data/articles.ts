@@ -1,3 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export interface Article {
   slug: string;
   title: string;
@@ -88,5 +93,44 @@ Bifacial solar technology captures ambient solar radiance from both the front su
 
 ### Amortization Comparison
 While bifacial modules demand a slightly higher initial hardware procurement premium, their enhanced physical tracking and dual-side capture metrics reduce macro-level levelized cost of energy (LCOE) inputs significantly when deployed over highly reflective groundwork configurations.`
+  },
+  {
+    slug: `adms-vs-derms-vs-scada-2026`,
+    title: `ADMS vs. DERMS vs. SCADA: Smart Grid Infrastructure Orchestration Compared`,
+    excerpt: `An absolute technical mapping comparing grid load-balancing automation frameworks for next-generation utility operator management platforms.`,
+    category: `Technology`,
+    date: `June 3, 2026`,
+    readTime: `10 min read`,
+    image: `https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1200&q=80`,
+    tags: [`adms`, `derms`, `scada-systems`, `smart-grid`],
+    content: `## Modern Infrastructure Management Systems Explained
+As decentralized residential photovoltaic generation arrays saturate regional distribution lines, electrical utility companies are swapping basic industrial tracking software for hyper-automated smart components.
+
+### Defining the 3 Infrastructure Framework layers
+* **SCADA (Supervisory Control and Data Acquisition):** The foundation level. Monitors hardware field relays and handles telemetric status logging loops for high-voltage substations.
+* **ADMS (Advanced Distribution Management Systems):** The logic engine layer. Inherits raw SCADA feeds and executes advanced calculations to protect hardware against out-of-bounds voltage shifts and localized transformer failures.
+* **DERMS (Distributed Energy Resources Management Systems):** The aggregation controller. Operates on the absolute edge of the network, managing multi-tier clusters of electric vehicle charging pods and residential net-metering variables.
+
+### Building Grid Cohesion
+To ensure safe distribution, system designers map unified communication channels using cross-compatible protocols so that SCADA feeds pass straight into central ADMS cores without runtime data dropouts.`
+  },
+  {
+    slug: `transformer-condition-monitoring-sensors`,
+    title: `The Engineering Guide to Transformer Condition Monitoring Sensors`,
+    excerpt: `How utility operations leverage dissolved gas analytics, thermal acoustic arrays, and real-time core tracking indicators to prevent transformer degradation.`,
+    category: `Technology`,
+    date: `June 2, 2026`,
+    readTime: `9 min read`,
+    image: `https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=1200&q=80`,
+    tags: [`sensors`, `condition-monitoring`, `transformers`, `hardware`],
+    content: `## Hardening the Distribution Boundary
+Electrical transformers are the critical infrastructure nodes matching utility line loads to residential hardware inputs. Tracking their performance health indicators automatically saves operators millions in repair cycles.
+
+### Vital Monitoring Vectors
+* **Dissolved Gas Analysis (DGA):** Online hydrogen and carbon monoxide gas tracking sensors detect micro-arcing events occurring inside transformer insulating oils.
+* **Thermal Fiber Optic Assemblies:** Probes inserted directly near core wind coils calculate accurate telemetry metrics describing internal heat patterns.
+
+### Preventing High-Voltage System Meltdowns
+When edge sensors continuously publish structural operational metrics into predictive failure models, field engineering groups can intercept localized balancing degradation loops before field hardware disconnects.`
   }
 ];
