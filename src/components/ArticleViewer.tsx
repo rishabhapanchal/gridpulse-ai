@@ -24,6 +24,24 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .slice(0, 3);
   }, [article]);
 
+  // ----------------------------------------------------------------
+  // VITE ASSET PATH REDIRECTION RESOLVER
+  // ----------------------------------------------------------------
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    // If path is an absolute public directory reference or external domain link, pass straight through
+    if (imagePath.startsWith('/') || imagePath.startsWith('http')) return imagePath;
+
+    try {
+      // Maps images residing dynamically inside your /src/assets directory
+      return new URL(`../assets/${imagePath}`, import.meta.url).href;
+    } catch (error) {
+      console.error("Vite runtime dynamic asset loading exception:", error);
+      return '';
+    }
+  };
+  // ----------------------------------------------------------------
+
   if (!article) {
     return (
       <div className="min-h-[60vh] bg-[#070709] text-slate-200 flex flex-col items-center justify-center text-center p-6">
@@ -107,9 +125,18 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
           {article.excerpt}
         </p>
 
+        {/* IMAGE COMPONENT CONTAINER FEATURING VITE RESOLUTION PARSING */}
         {article.image && (
-          <div className="w-full aspect-[21/9] rounded-xl overflow-hidden shadow-2xl border border-neutral-900 my-6">
-            <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+          <div className="w-full aspect-[21/9] rounded-xl overflow-hidden shadow-2xl border border-neutral-900 my-6 bg-slate-950">
+            <img 
+              src={getImageUrl(article.image)} 
+              alt={article.title} 
+              className="w-full h-full object-cover" 
+              onError={(e) => {
+                // If path breaks due to string mismatch, handle gracefully by hiding container line
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           </div>
         )}
       </header>
