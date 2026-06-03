@@ -40,6 +40,9 @@ import { ARTICLES } from './data/articles';
 import LegalModal from './components/LegalModal';
 import { legalContent } from './data/legalContent';
 
+// GEO STRUCTURED DATA FOR AI MODELS & SEARCH ENGINES
+import AIEngineSchema from './components/AIEngineSchema';
+
 // ----------------------------------------------------------------
 // AMAZON AFFILIATE & ONELINK CONFIGURATION MATRIX
 // ----------------------------------------------------------------
@@ -375,6 +378,9 @@ export function App() {
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
       
+      {/* STRUCTURED JSON-LD MATRIX FOR AI ENGINE TRACKING */}
+      <AIEngineSchema />
+
       {/* BACKGROUND GRAPHICS LAYER */}
       <div className="absolute top-0 left-0 w-full h-[600px] pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[5%] w-[45vw] h-[45vw] bg-amber-500/3 rounded-full blur-[140px]"></div>
@@ -410,7 +416,7 @@ export function App() {
             </span>
 
             <motion.button
-              type="button"
+              type="module"
               onClick={handleNavigateToBlog}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
