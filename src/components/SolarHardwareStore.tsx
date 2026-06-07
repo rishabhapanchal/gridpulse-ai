@@ -1,20 +1,30 @@
-import React from 'react';
-import { ShoppingCart, ExternalLink, ShieldCheck, Truck, Package } from 'lucide-react';
-import { motion } from 'motion/react';
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-interface CountryConfig {
-  code: string;
-  currency: string;
-  symbol: string;
-  typicalSolarCostPerWatt: number;
+import React from 'react';
+import { ShoppingBag, ArrowUpRight, ShieldCheck, Cpu, Layers } from 'lucide-react';
+
+interface HardwareProduct {
+  id: string;
+  name: string;
+  description: string;
+  priceEstimate: string;
+  asinOrQuery: string;
+  badge?: string;
+  specs: string[];
 }
 
 interface SolarHardwareStoreProps {
-  country: CountryConfig;
+  country: {
+    code: string;
+    currency: string;
+    symbol: string;
+  };
   results: {
     panelsNeeded: number;
     systemSizeKw: number;
-    netCost: number;
   };
   panelsNeeded: number;
   systemSizeKw: number;
@@ -23,140 +33,166 @@ interface SolarHardwareStoreProps {
 
 export default function SolarHardwareStore({
   country,
-  results,
-  panelsNeeded,
   systemSizeKw,
-  getRegionalAffiliateLink,
+  panelsNeeded,
+  getRegionalAffiliateLink
 }: SolarHardwareStoreProps) {
   
-  // Dynamic hardware hardware specifications dictionary matrix matching system calculations
-  const hardwareItems = [
-    {
-      id: 'pv-modules',
-      name: 'Tier-1 Monocrystalline High-Yield PV Panels',
-      specs: `${panelsNeeded}x 400W Modules | Solid Tempered Glass`,
-      description: 'Ultra-high efficiency multi-busbar panels optimized for extreme low-light photon absorption metrics.',
-      priceEstimate: results.netCost * 0.45,
-      searchQuery: `${panelsNeeded} Monocrystalline Solar Panels 400W`
-    },
-    {
-      id: 'hybrid-inverter',
-      name: 'Smart Grid-Tied Hybrid MPPT Inverter',
-      specs: `${Math.ceil(systemSizeKw)}kW Capacity Pure Sine Wave System`,
-      description: 'Dual phase logic engine with integrated automatic transfer switching and real-time app telemetry links.',
-      priceEstimate: results.netCost * 0.25,
-      searchQuery: `${Math.ceil(systemSizeKw)}kW Grid Tied Solar Inverter`
-    },
-    {
-      id: 'storage-battery',
-      name: 'Lithium Iron Phosphate (LiFePO4) Battery Pack',
-      specs: '48V 100Ah | 5,000+ Deep Continuous Life Cycles',
-      description: 'Thermal-runaway proof high-density safe modular home energy cell backup expansion array.',
-      priceEstimate: results.netCost * 0.30,
-      searchQuery: '48V 100Ah LiFePO4 Solar Battery Backup'
+  // Dynamic generation of products based on calculated system capacity constraints
+  const hardwareBundles = React.useMemo<HardwareProduct[]>(() => {
+    const target = country.code.toUpperCase();
+    const isINR = target === 'IN';
+
+    if (systemSizeKw <= 4) {
+      return [
+        {
+          id: 'panels-starter',
+          name: isINR ? 'Waaree/Adani Mono PERC Solar Array Pack' : 'Renogy Monocrystalline Solar Panel Bundle',
+          description: `Complete structural matching set of PV units to hit your calculated ${systemSizeKw.toFixed(1)} kW generation target footprint.`,
+          priceEstimate: isINR ? '₹1,15,000' : '$1,450',
+          asinOrQuery: isINR ? 'Solar Panel 400W Mono' : 'B07GF5G63B',
+          badge: 'Perfect Fit',
+          specs: [`Includes ${panelsNeeded} High-Efficiency Panels`, 'Optimized for Low-Light Irradiance', '25-Year Performance Warranty']
+        },
+        {
+          id: 'inverter-starter',
+          name: isINR ? 'Microtek/Luminous 24V Smart Hybrid Inverter' : 'Renogy 3000W Pure Sine Wave Hybrid Inverter',
+          description: 'High-speed processing core matrix managing battery isolation and real-time residential net-metering synchronization.',
+          priceEstimate: isINR ? '₹24,500' : '$520',
+          asinOrQuery: isINR ? 'Hybrid Inverter 3kW' : 'B07N1C777H',
+          specs: ['Pure Sine Wave Clean Output', 'Built-in MPPT Charge Controller', '95% Efficiency Conversion Rating']
+        }
+      ];
+    } else {
+      // High-Ticket Commercial/Heavy Residential Infrastructure Tiers
+      return [
+        {
+          id: 'panels-advanced',
+          name: isINR ? 'Premium BiFacial High-Yield Solar Array Grid' : 'BougeRV 400W Mono PERC Heavy Array Bundle',
+          description: `Heavy-duty industrial scale module set designed to output your calculated ${systemSizeKw.toFixed(1)} kW power load requirements.`,
+          priceEstimate: isINR ? '₹3,40,000' : '$4,800',
+          asinOrQuery: isINR ? 'Bifacial Solar Panel 400W' : 'Solar Panel Kit 400W Pack',
+          badge: 'High Yield Capability',
+          specs: [`Includes ${panelsNeeded} Dynamic Modules`, 'Dual-Side Albedo Extraction Ready', 'Anti-PID Infrastructure Hardening']
+        },
+        {
+          id: 'inverter-advanced',
+          name: isINR ? 'Growatt/Sukam 48V Commercial Hybrid Inverter' : 'EG4 18kPV Smart Hybrid Inverter Core',
+          description: 'Industrial-grade distribution center orchestrating concurrent multi-phase load profiles, automated battery banks, and high-voltage inputs.',
+          priceEstimate: isINR ? '₹85,000' : '$1,850',
+          asinOrQuery: isINR ? 'Growatt Hybrid Inverter 10kW' : 'Growatt Inverter 10kW Hybrid',
+          specs: ['Multi-Phase Load Orchestration', 'Rapid Shutdown Grid Compliance', 'Mobile Telemetry Application Sync']
+        },
+        {
+          id: 'storage-advanced',
+          name: isINR ? '48V 100Ah LiFePO4 Lithium Battery Storage Bank' : 'TimeUSB 48V 100Ah LiFePO4 Deep Cycle Battery Core',
+          description: 'High-density structural energy storage matrix ensuring uninterrupted grid-independent operational backup loops.',
+          priceEstimate: isINR ? '₹1,65,000' : '$1,299',
+          asinOrQuery: isINR ? 'LiFePO4 48V Battery' : 'B0C7K6B8X6',
+          badge: 'Off-Grid Essential',
+          specs: ['5,000+ Deep Amortization Cycles', 'Integrated Intelligent BMS Protection', 'Expandable Modular Architecture Node']
+        }
+      ];
     }
-  ];
-
-  const fallbackCompleteKitQuery = `Complete DIY Solar Panel Kit ${Math.ceil(systemSizeKw)}kW`;
-
-  const formatLocalPrice = (val: number) => {
-    return new Intl.NumberFormat(country.currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: country.currency,
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
+  }, [systemSizeKw, panelsNeeded, country.code]);
 
   return (
-    <div className="relative glass-panel rounded-[28px] p-5 sm:p-7 border border-white/5 bg-slate-900/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden w-full">
-      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+    <div className="mt-8 relative z-20 w-full bg-slate-950/40 border border-slate-900 rounded-[32px] p-6 sm:p-8 backdrop-blur-xl shadow-2xl overflow-hidden">
+      {/* Structural Accent Highlights */}
+      <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
       
-      {/* HUB HEADERS */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-5 mb-6">
-        <div className="space-y-1">
-          <span className="text-[9px] font-mono text-amber-400 uppercase tracking-widest font-extrabold bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-md inline-block">
-            Integrators Tool & Hardware Deck
-          </span>
-          <h2 className="text-lg font-glass-title font-bold tracking-tight text-slate-100 flex items-center gap-2">
-            <ShoppingCart className="w-4 h-4 text-amber-500" />
-            Amazon Hardware Marketplace
-          </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900 pb-6 mb-8 text-left">
+        <div>
+          <div className="flex items-center gap-2 text-amber-400 text-xs font-mono font-black uppercase tracking-widest bg-amber-500/5 border border-amber-500/10 px-3 py-1 rounded-xl w-max">
+            <ShoppingBag className="w-3.5 h-3.5" /> Hardware Procurement Storefront
+          </div>
+          <h3 className="text-xl font-bold tracking-tight text-slate-100 mt-3 font-display">
+            Recommended Component Hardware Bundles
+          </h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Pre-configured hardware listings programmatically sized to match your <span className="text-amber-400 font-mono font-bold">{systemSizeKw.toFixed(1)}kW</span> system load forecast.
+          </p>
         </div>
-        <div className="text-[10px] font-mono text-slate-450 bg-black/40 border border-white/5 px-3 py-1 rounded-lg flex items-center gap-1.5">
-          <Truck className="w-3.5 h-3.5 text-amber-500" />
-          <span>Regional Delivery Active ({country.code})</span>
+        <div className="text-left sm:text-right shrink-0 bg-slate-900/40 border border-slate-850 rounded-2xl px-4 py-2.5 font-mono">
+          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Target Geo Market Marketplace</div>
+          <div className="text-xs text-slate-200 font-bold mt-0.5 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Amazon OneLink Ecosystem ({country.currency})
+          </div>
         </div>
       </div>
 
-      {/* HARDWARE SPECIFICATION GRID LAYOUT MATRIX */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-        {hardwareItems.map((item) => {
-          // Generates the absolute, target URL safely handled via standard URI component encoders
-          const itemAffiliateUrl = getRegionalAffiliateLink(encodeURIComponent(item.searchQuery));
-
+      {/* Product Display Cards Mapping Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {hardwareBundles.map((product) => {
+          const affiliateUrl = getRegionalAffiliateLink(product.asinOrQuery);
+          
           return (
             <div 
-              key={item.id} 
-              className="bg-slate-950/60 border border-slate-850 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:border-slate-700 group relative text-left"
+              key={product.id}
+              className="group relative bg-slate-950/80 border border-slate-900 hover:border-amber-500/20 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl hover:shadow-[0_12px_40px_rgba(0,0,0,0.7)] text-left"
             >
-              <div className="space-y-2">
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800 uppercase tracking-wide truncate max-w-[180px]">
-                    {item.specs}
-                  </span>
-                  <Package className="w-4 h-4 text-slate-600 group-hover:text-amber-500 transition-colors shrink-0" />
+              {product.badge && (
+                <span className="absolute top-3 right-3 text-[9px] font-mono font-black bg-amber-500 text-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm z-10">
+                  {product.badge}
+                </span>
+              )}
+
+              <div className="space-y-4">
+                <div className="p-3 bg-slate-900/60 border border-slate-850 rounded-xl w-max group-hover:border-amber-500/20 group-hover:bg-amber-500/5 transition-colors duration-300">
+                  {product.id.includes('panel') ? (
+                    <Layers className="w-5 h-5 text-amber-400" />
+                  ) : product.id.includes('inverter') ? (
+                    <Cpu className="w-5 h-5 text-amber-400" />
+                  ) : (
+                    <ShieldCheck className="w-5 h-5 text-amber-400" />
+                  )}
                 </div>
-                <h3 className="text-xs font-bold text-slate-200 group-hover:text-slate-100 transition-colors leading-snug">
-                  {item.name}
-                </h3>
-                <p className="text-[11px] text-slate-400 leading-relaxed font-sans line-clamp-3">
-                  {item.description}
-                </p>
+
+                <div>
+                  <h4 className="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition-colors line-clamp-1">
+                    {product.name}
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed min-h-[32px]">
+                    {product.description}
+                  </p>
+                </div>
+
+                <ul className="space-y-1.5 pt-1 border-t border-slate-900/60">
+                  {product.specs.map((spec, i) => (
+                    <li key={i} className="text-[11px] font-mono text-slate-450 flex items-center gap-2 truncate">
+                      <span className="w-1 h-1 rounded-full bg-amber-500/60 shrink-0"></span>
+                      <span>{spec}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-900 flex items-center justify-between gap-2">
+              <div className="mt-6 pt-4 border-t border-slate-900 flex items-center justify-between gap-2">
                 <div>
-                  <div className="text-[9px] font-mono text-slate-500 uppercase">Est. Local Price</div>
-                  <div className="text-sm font-mono font-bold text-amber-400 mt-0.5">
-                    {formatLocalPrice(item.priceEstimate)}
+                  <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">Est. Market Cost</div>
+                  <div className="text-base font-black font-mono text-slate-200 mt-0.5">
+                    {product.priceEstimate}
                   </div>
                 </div>
-                
-                <a
-                  href={itemAffiliateUrl}
+
+                <a 
+                  href={affiliateUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/30 hover:bg-amber-500/5 text-slate-400 hover:text-amber-400 transition-all duration-200 cursor-pointer shadow-inner"
-                  title={`Search exact item on Amazon ${country.code}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-amber-500 text-slate-300 hover:text-black border border-slate-800 hover:border-amber-400 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md active:scale-95 group/btn"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  View Pack <ArrowUpRight className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                 </a>
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* DISCLOSURE FOOTER BANNER ACTIONS */}
-      <div className="p-4 bg-slate-950/40 border border-slate-850/60 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-start gap-2.5 max-w-2xl text-left">
-          <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0 translate-y-0.5" />
-          <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
-            <strong>Verified Partner Integration:</strong> All system components map directly back to target local inventory channels. Procurement triggers secure tracking logs configuration setup models to optimize your design pipeline hardware specs.
-          </p>
-        </div>
-
-        <motion.a
-          href={getRegionalAffiliateLink(encodeURIComponent(fallbackCompleteKitQuery))}
-          target="_blank"
-          rel="noopener noreferrer"
-          whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(245,158,11,0.25)' }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full sm:w-auto text-center shrink-0 bg-amber-500 hover:bg-amber-400 text-black font-mono font-black text-xs uppercase px-6 py-3 rounded-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
-        >
-          <span>Procure Complete DIY Solar Kit</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </motion.a>
+      
+      <div className="mt-6 flex items-center gap-2.5 text-[10px] font-mono text-slate-500 max-w-xl mx-auto text-center justify-center border-t border-slate-900/60 pt-4">
+        <ShieldCheck className="w-4 h-4 text-slate-600 shrink-0" />
+        <span>Affiliate Disclosure: Hardware links route via regionalized marketplace tags tracking commission payouts automatically.</span>
       </div>
     </div>
   );
